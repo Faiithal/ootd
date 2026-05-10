@@ -29,7 +29,7 @@ int created_outfits_count = 2;
 
 // TODO: Implement Check Closet
 
-// Add Apparel Functions
+// Add Apparel Helper Functions
 void modifyTop(struct Outfit *outfit)
 {
     int option_piece;
@@ -235,6 +235,7 @@ void modifyBag(struct Outfit *outfit)
     (*outfit).bag = &bags[option_piece - 1];
 }
 
+// Outfit Helper Functions
 int isOutfitAvailable(struct Outfit outfit)
 {
     // NOTE: AHHH Nabubulag ako sa lala ng readability
@@ -299,6 +300,8 @@ int displayOutfitEntry(struct Outfit outfit, char outfitLabel[])
 
     printf("\n");
 }
+
+// Outfit Main Features
 
 void modifyOutfit(struct Outfit *outfit)
 {
@@ -397,6 +400,61 @@ void createOutfitMenu()
     //
 }
 
+void markOutfitClothesUnavailable(struct Outfit outfit)
+{
+    if (outfit.top != NULL && outfit.top->available)
+        outfit.top->available = 0;
+
+    if (outfit.bottom != NULL && outfit.bottom->available)
+        outfit.bottom->available = 0;
+    
+    if (outfit.shoes != NULL && outfit.shoes->available)
+        outfit.shoes->available = 0;
+
+    if (outfit.headwear != NULL && outfit.headwear->available)
+        outfit.headwear->available = 0;
+
+    if (outfit.accessory != NULL && outfit.accessory->available)
+        outfit.accessory->available = 0;
+
+    if (outfit.bag != NULL && outfit.bag->available)
+        outfit.bag->available = 0;
+}
+
+void pickOOTD()
+{
+    int option;
+    char outfitLabel[50];
+
+    for (int i = 0; i < created_outfits_count; i++)
+    {
+        snprintf(outfitLabel, sizeof(outfitLabel), "Outfit %d", i + 1);
+        printf("[%d] %s\n", i + 1, outfitLabel);
+    }
+
+    while (1)
+    {
+        printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+        printf("Pick an outfit: ");
+        scanf("%d", &option);
+
+        if (option < 1 || option > created_outfits_count)
+        {
+            printf("ERROR: Invalid Option, Please try again.\n");
+        }
+        else
+            break;
+    }
+
+    printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+    printf("Outfit of the day:\n");
+    
+    snprintf(outfitLabel, sizeof(outfitLabel), "Outfit %d", option);
+    displayOutfitEntry(outfits[option - 1], outfitLabel);
+       
+    markOutfitClothesUnavailable(outfits[option - 1]);
+}
+
 void checkOutfits()
 {
     while (1)
@@ -432,8 +490,8 @@ void checkOutfits()
             break;
 
         case 2:
-            // pickOOTD();
-            return;
+            pickOOTD();
+            break;
 
         case 3:
             return;
@@ -442,8 +500,6 @@ void checkOutfits()
         }
     }
 }
-
-// TODO: Implement Display OOTD
 // TODO: Implement Wash Clothes
 
 int main()
