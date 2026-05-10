@@ -17,6 +17,16 @@ struct Outfit
     struct Apparel *bag;
 };
 
+struct Apparel top[9] = {0};
+struct Apparel bottom[9] = {0};
+struct Apparel shoes[9] = {0};
+struct Apparel headwear[9] = {0};
+struct Apparel accessory[9] = {0};
+struct Apparel bag[9] = {0};
+
+struct Outfit outfits[50] = {0};
+int created_outfits_count = 2;
+
 // TODO: Implement Check Closet
 
 // TODO: Impelement Check Outfit
@@ -85,15 +95,57 @@ int displayOutfitEntry(struct Outfit outfit, char outfitLabel[])
     printf("\n");
 }
 
-void createOutfit()
+void copyOutfit(struct Outfit outfit, struct Outfit temp_outfit)
 {
+    outfit.top = temp_outfit.top;
+    outfit.bottom = temp_outfit.bottom;
+    outfit.shoes = temp_outfit.shoes;
+    outfit.headwear = temp_outfit.headwear;
+    outfit.accessory = temp_outfit.accessory;
+    outfit.bag = temp_outfit.bag;
+}
+
+void createOutfitMenu()
+{
+    struct Outfit temp_outfit;
+
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     printf("Current Outfit Configuration");
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
 
     // Display Current Outfit Configuration
-    // Action Menu of 3 options: [1] Add/Modify a clothing piece, [2] Create Outfit, [3] Back
-        
+    displayOutfitEntry(temp_outfit, "Outfit");
+
+    // Action Menu
+    while (1)
+    {
+        int option = 0;
+
+        printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+        printf("[1] Add/Modify a clothing piece\n");
+        printf("[2] Save Outfit\n");
+        printf("[3] Back\n");
+        printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+
+        printf("Choice: ");
+        scanf("%d", &option);
+
+        switch (option)
+        {
+        case 1:
+            
+            break;
+        case 2:
+            // Copy Contents of temp_outfit to outfits[i]
+            copyOutfit(outfits[created_outfits_count], temp_outfit);
+
+            break;
+        case 3:
+            return;
+        default:
+            printf("ERROR: Invalid Option, Please try again.\n");
+        }
+    }
     //
 }
 
@@ -115,7 +167,7 @@ void displayOutfitMenu()
         switch (option)
         {
         case 1:
-            createOutfit();
+            createOutfitMenu();
             break;
 
         case 2:
@@ -132,8 +184,6 @@ void displayOutfitMenu()
 
 void checkOutfits(struct Outfit outfits[], int created_outfits_count)
 {
-    int total_pieces = 6;
-
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     printf("Outfits:\n");
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
@@ -154,16 +204,6 @@ void checkOutfits(struct Outfit outfits[], int created_outfits_count)
 
 int main()
 {
-    struct Apparel top[9] = {0};
-    struct Apparel bottom[9] = {0};
-    struct Apparel shoes[9] = {0};
-    struct Apparel headwear[9] = {0};
-    struct Apparel accessory[9] = {0};
-    struct Apparel bag[9] = {0};
-
-    struct Outfit outfits[50] = {0};
-    int created_outfits_count = 2;
-
     // Sample Closet Data
     strcpy(top[0].name, "Elite Miko Shirt");
     top[0].available = 1;
