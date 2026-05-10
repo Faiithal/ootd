@@ -51,12 +51,49 @@ int isOutfitAvailable(struct Outfit outfit)
     return 1;
 }
 
+int displayOutfitEntry(struct Outfit outfit, char outfitLabel[])
+{
+    printf("( %s )", isOutfitAvailable(outfit) ? "Available" : "Unavailable");
+
+    printf("| %s | ", outfitLabel);
+
+    if (outfit.top->name != NULL)
+    {
+        printf("Top: %s | ", outfit.top->name);
+    }
+    if (outfit.bottom->name != NULL)
+    {
+        printf("Bottom: %s | ", outfit.bottom->name);
+    }
+    if (outfit.shoes->name != NULL)
+    {
+        printf("Shoes: %s | ", outfit.shoes->name);
+    }
+    if (outfit.headwear->name != NULL)
+    {
+        printf("Headwear: %s | ", outfit.headwear->name);
+    }
+    if (outfit.accessory->name != NULL)
+    {
+        printf("Accessory: %s | ", outfit.accessory->name);
+    }
+    if (outfit.bag->name != NULL)
+    {
+        printf("Bag: %s | ", outfit.bag->name);
+    }
+
+    printf("\n");
+}
+
 void createOutfit()
 {
+    printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+    printf("Current Outfit Configuration");
+    printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+
     // Display Current Outfit Configuration
-
-    // Action Menu of two options: [1] Add/Modify a clothing piece, [2] Create Outfit
-
+    // Action Menu of 3 options: [1] Add/Modify a clothing piece, [2] Create Outfit, [3] Back
+        
     //
 }
 
@@ -65,7 +102,7 @@ void displayOutfitMenu()
     while (1)
     {
         int option = 0;
-        
+
         printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
         printf("[1] Create Outfit\n");
         printf("[2] Pick Outfit of the Day\n");
@@ -82,11 +119,13 @@ void displayOutfitMenu()
             break;
 
         case 2:
-            pickOOTD();
+            // pickOOTD();
             return;
 
         case 3:
             return;
+        default:
+            printf("ERROR: Invalid Option, Please try again.\n");
         }
     }
 }
@@ -101,38 +140,9 @@ void checkOutfits(struct Outfit outfits[], int created_outfits_count)
 
     for (int i = 0; i < created_outfits_count; i++)
     {
-
-        // TODO: Implement isOutfitAvailable()
-        printf("( %s )", isOutfitAvailable(outfits[i]) ? "Available" : "Unavailable");
-
-        printf("| Outfit %d | ", i + 1);
-
-        if (outfits[i].top->name != NULL)
-        {
-            printf("Top: %s | ", outfits[i].top->name);
-        }
-        if (outfits[i].bottom->name != NULL)
-        {
-            printf("Bottom: %s | ", outfits[i].bottom->name);
-        }
-        if (outfits[i].shoes->name != NULL)
-        {
-            printf("Shoes: %s | ", outfits[i].shoes->name);
-        }
-        if (outfits[i].headwear->name != NULL)
-        {
-            printf("Headwear: %s | ", outfits[i].headwear->name);
-        }
-        if (outfits[i].accessory->name != NULL)
-        {
-            printf("Accessory: %s | ", outfits[i].accessory->name);
-        }
-        if (outfits[i].bag->name != NULL)
-        {
-            printf("Bag: %s | ", outfits[i].bag->name);
-        }
-
-        printf("\n");
+        char outfitLabel[50];
+        snprintf(outfitLabel, sizeof(outfitLabel), "Outfit %d", i + 1);
+        displayOutfitEntry(outfits[i], outfitLabel);
     }
 
     // TODO: Implement displayOutfitMenu()
