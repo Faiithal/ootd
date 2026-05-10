@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    char closetName[50];
+    int choice;
+
+    // --- START ---
+    printf("==========================================\n");
+    printf("        WELCOME TO DIGITAL CLOSET        \n");
+    printf("==========================================\n");
+    printf("Enter Closet Name: ");
+    scanf(" %[^\n]s", closetName);
+
+    // --- ACTION MENU ---
+    while(1) {
+        printf("\n******************************************\n");
+        printf("    ACTION MENU - %s\n", closetName);
+        printf("******************************************\n");
+        printf(" [1] Check Closet\n");
+        printf(" [2] Check Outfit List\n");
+        printf(" [3] Wash Laundry\n");
+        printf(" [4] Exit\n");
+        printf("------------------------------------------\n");
+        printf("Select Action: ");
+        scanf("%d", &choice);
+
+        if (choice == 1) {
+            // --- CLOSET VIEW ---
+            printf("\n------------------------------------------\n");
+            printf("            MY CLOSET (Items)             \n");
+            printf("------------------------------------------\n");
+            printf(" 1. White Top       [Available]\n");
+            printf(" 2. Pink Jeans      [Available]\n");
+            printf(" 3. Black Jeans     [Available]\n");
+            printf("\n [0] Go Back to Menu\n");
+            printf("------------------------------------------\n");
+            printf("Selection: ");
+            scanf("%d", &choice);
+        } 
+        else if (choice == 2) {
+            // --- OUTFIT LIST ---
+            printf("\n------------------------------------------\n");
+            printf("               OUTFIT LIST                \n");
+            printf("------------------------------------------\n");
+            printf(" [1] Outfit 1 (White top, Pink jeans)\n");
+            printf(" [2] Outfit 2 (White top, Black jeans)\n");
+            printf("\n [0] Go Back to Menu\n");
+            printf("------------------------------------------\n");
+            printf("Choose Outfit: ");
+            scanf("%d", &choice);
+
+            if (choice != 0) {
+                // --- DISPLAY OOTD ---
+                printf("\n==========================================\n");
+                printf("             DISPLAYING OOTD              \n");
+                printf("==========================================\n");
+                printf("      You are now wearing Outfit %d!      \n", choice);
+                printf("    Items marked as 'Unavailable' now.    \n");
+                printf("==========================================\n");
+                printf("Press 1 to go back: ");
+                scanf("%d", &choice);
+            }
+        } 
+        else if (choice == 3) {
+            // --- WASH LAUNDRY ---
+            printf("\n[!] Washing Clothes...\n");
+            printf("[!] All items are now available again!\n");
+        } 
+        else if (choice == 4) {
+            printf("\nExiting Program...\n");
+            break;
+        }
+    }
+
+    return 0;
+}
