@@ -49,7 +49,7 @@ void modifyTop(struct Outfit *outfit)
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     for (int i = 0; i < createdApparelSize; i++)
     {
-        printf("[%d] %s\n", i + 1, tops[i].name);
+        printf("[%d] %s ( %s )\n", i + 1, tops[i].name, tops[i].available ? "Available" : "Unavailable");
     }
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
 
@@ -59,6 +59,11 @@ void modifyTop(struct Outfit *outfit)
     if (option_piece < 1 || option_piece > createdApparelSize)
     {
         printf("ERROR: Invalid Option, Please try again.\n");
+        return;
+    }
+
+    if(!tops[option_piece - 1].available){
+        printf("ERROR: Chosen piece is unavailable. Please use an available piece");
         return;
     }
 
@@ -83,7 +88,7 @@ void modifyBottom(struct Outfit *outfit)
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     for (int i = 0; i < createdApparelSize; i++)
     {
-        printf("[%d] %s\n", i + 1, bottoms[i].name);
+        printf("[%d] %s ( %s )\n", i + 1, bottoms[i].name, bottoms[i].available ? "Available" : "Unavailable");
     }
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
 
@@ -93,6 +98,11 @@ void modifyBottom(struct Outfit *outfit)
     if (option_piece < 1 || option_piece > createdApparelSize)
     {
         printf("ERROR: Invalid Option, Please try again.\n");
+        return;
+    }
+
+    if(!bottoms[option_piece - 1].available){
+        printf("ERROR: Chosen piece is unavailable. Please use an available piece");
         return;
     }
 
@@ -117,7 +127,7 @@ void modifyShoes(struct Outfit *outfit)
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     for (int i = 0; i < createdApparelSize; i++)
     {
-        printf("[%d] %s\n", i + 1, shoes[i].name);
+        printf("[%d] %s ( %s )\n", i + 1, shoes[i].name, shoes[i].available ? "Available" : "Unavailable");
     }
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
 
@@ -127,6 +137,11 @@ void modifyShoes(struct Outfit *outfit)
     if (option_piece < 1 || option_piece > createdApparelSize)
     {
         printf("ERROR: Invalid Option, Please try again.\n");
+        return;
+    }
+
+    if(!shoes[option_piece - 1].available){
+        printf("ERROR: Chosen piece is unavailable. Please use an available piece");
         return;
     }
 
@@ -151,7 +166,7 @@ void modifyHeadwear(struct Outfit *outfit)
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     for (int i = 0; i < createdApparelSize; i++)
     {
-        printf("[%d] %s\n", i + 1, headwears[i].name);
+        printf("[%d] %s ( %s )\n", i + 1, headwears[i].name, headwears[i].available ? "Available" : "Unavailable");
     }
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
 
@@ -161,6 +176,11 @@ void modifyHeadwear(struct Outfit *outfit)
     if (option_piece < 1 || option_piece > createdApparelSize)
     {
         printf("ERROR: Invalid Option, Please try again.\n");
+        return;
+    }
+
+    if(!headwears[option_piece - 1].available){
+        printf("ERROR: Chosen piece is unavailable. Please use an available piece");
         return;
     }
 
@@ -185,7 +205,7 @@ void modifyAccessory(struct Outfit *outfit)
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     for (int i = 0; i < createdApparelSize; i++)
     {
-        printf("[%d] %s\n", i + 1, accessories[i].name);
+        printf("[%d] %s ( %s )\n", i + 1, accessories[i].name, accessories[i].available ? "Available" : "Unavailable");
     }
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
 
@@ -195,6 +215,11 @@ void modifyAccessory(struct Outfit *outfit)
     if (option_piece < 1 || option_piece > createdApparelSize)
     {
         printf("ERROR: Invalid Option, Please try again.\n");
+        return;
+    }
+
+    if(!accessories[option_piece - 1].available){
+        printf("ERROR: Chosen piece is unavailable. Please use an available piece");
         return;
     }
 
@@ -219,7 +244,7 @@ void modifyBag(struct Outfit *outfit)
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     for (int i = 0; i < createdApparelSize; i++)
     {
-        printf("[%d] %s\n", i + 1, bags[i].name);
+        printf("[%d] %s ( %s )\n", i + 1, bags[i].name, bags[i].available ? "Available" : "Unavailable");
     }
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
 
@@ -229,6 +254,11 @@ void modifyBag(struct Outfit *outfit)
     if (option_piece < 1 || option_piece > createdApparelSize)
     {
         printf("ERROR: Invalid Option, Please try again.\n");
+        return;
+    }
+
+    if(!bags[option_piece - 1].available){
+        printf("ERROR: Chosen piece is unavailable. Please use an available piece");
         return;
     }
 
