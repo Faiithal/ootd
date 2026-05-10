@@ -51,11 +51,53 @@ int isOutfitAvailable(struct Outfit outfit)
     return 1;
 }
 
+void createOutfit()
+{
+    // Display Current Outfit Configuration
+
+    // Action Menu of two options: [1] Add/Modify a clothing piece, [2] Create Outfit
+
+    //
+}
+
+void displayOutfitMenu()
+{
+    while (1)
+    {
+        int option = 0;
+        
+        printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+        printf("[1] Create Outfit\n");
+        printf("[2] Pick Outfit of the Day\n");
+        printf("[3] Back\n");
+        printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+
+        printf("Choice: ");
+        scanf("%d", &option);
+
+        switch (option)
+        {
+        case 1:
+            createOutfit();
+            break;
+
+        case 2:
+            pickOOTD();
+            return;
+
+        case 3:
+            return;
+        }
+    }
+}
+
 void checkOutfits(struct Outfit outfits[], int created_outfits_count)
 {
     int total_pieces = 6;
 
-    printf("Current Outfits:\n");
+    printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+    printf("Outfits:\n");
+    printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
 
     for (int i = 0; i < created_outfits_count; i++)
     {
@@ -94,7 +136,7 @@ void checkOutfits(struct Outfit outfits[], int created_outfits_count)
     }
 
     // TODO: Implement displayOutfitMenu()
-    // displayOutfitMenu();
+    displayOutfitMenu();
 }
 
 // TODO: Implement Display OOTD
