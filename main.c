@@ -17,12 +17,12 @@ struct Outfit
     struct Apparel *bag;
 };
 
-struct Apparel top[9] = {0};
-struct Apparel bottom[9] = {0};
+struct Apparel tops[9] = {0};
+struct Apparel bottoms[9] = {0};
 struct Apparel shoes[9] = {0};
-struct Apparel headwear[9] = {0};
-struct Apparel accessory[9] = {0};
-struct Apparel bag[9] = {0};
+struct Apparel headwears[9] = {0};
+struct Apparel accessories[9] = {0};
+struct Apparel bags[9] = {0};
 
 struct Outfit outfits[50] = {0};
 int created_outfits_count = 2;
@@ -95,6 +95,39 @@ int displayOutfitEntry(struct Outfit outfit, char outfitLabel[])
     printf("\n");
 }
 
+void modifyOutfit(struct Outfit outfit)
+{
+    int option = 0;
+
+    printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+    printf("What piece of clothing do you like to add/overwrite?");
+    printf("[1] Tops\n");
+    printf("[2] Bottom\n");
+    printf("[3] Shoes\n");
+    printf("[4] Headwear\n");
+    printf("[5] Accessory\n");
+    printf("[6] Bag\n");
+    printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+    
+    switch (option)
+    // TODO: Figure a clean way to Implement Display available clothing of the chosen piece
+    {
+    case 1:
+        
+        break;
+    default:
+        printf("ERROR: Invalid Option, Please try again.\n");
+        return;
+    }
+
+    if (option < 1 || option > 6)
+    {
+    }
+
+    // TODO: Action Menu to choose to add or overwrite a piece
+    // TODO: Do action
+}
+
 void copyOutfit(struct Outfit outfit, struct Outfit temp_outfit)
 {
     outfit.top = temp_outfit.top;
@@ -122,7 +155,7 @@ void createOutfitMenu()
         int option = 0;
 
         printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
-        printf("[1] Add/Modify a clothing piece\n");
+        printf("[1] Add/Overwrite a clothing piece\n");
         printf("[2] Save Outfit\n");
         printf("[3] Back\n");
         printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
@@ -133,12 +166,13 @@ void createOutfitMenu()
         switch (option)
         {
         case 1:
-            
+            modifyOutfit(temp_outfit);
             break;
         case 2:
-            // Copy Contents of temp_outfit to outfits[i]
-            copyOutfit(outfits[created_outfits_count], temp_outfit);
+            // TODO: Create Validation for Outfit Creation
 
+            // Copy Contents of temp_outfit to outfits[i]
+            copyOutfit(outfits[created_outfits_count++], temp_outfit);
             break;
         case 3:
             return;
@@ -205,29 +239,29 @@ void checkOutfits(struct Outfit outfits[], int created_outfits_count)
 int main()
 {
     // Sample Closet Data
-    strcpy(top[0].name, "Elite Miko Shirt");
-    top[0].available = 1;
+    strcpy(tops[0].name, "Elite Miko Shirt");
+    tops[0].available = 1;
 
-    strcpy(top[1].name, "Black Suisei Shirt");
-    top[1].available = 1;
+    strcpy(tops[1].name, "Black Suisei Shirt");
+    tops[1].available = 1;
 
-    strcpy(bottom[0].name, "Black Jeans");
-    bottom[0].available = 1;
+    strcpy(bottoms[0].name, "Black Jeans");
+    bottoms[0].available = 1;
 
     strcpy(shoes[0].name, "Adidas Sambas");
     shoes[0].available = 1;
     strcpy(shoes[1].name, "Converse Shoes");
     shoes[1].available = 1;
 
-    printf("%s\n", top[0].name);
+    printf("%s\n", tops[0].name);
 
     // Sample Outfit Data
-    outfits[0].top = &top[0];
-    outfits[0].bottom = &bottom[0];
+    outfits[0].top = &tops[0];
+    outfits[0].bottom = &bottoms[0];
     outfits[0].shoes = &shoes[0];
 
-    outfits[1].top = &top[1];
-    outfits[1].bottom = &bottom[0];
+    outfits[1].top = &tops[1];
+    outfits[1].bottom = &bottoms[0];
     outfits[1].shoes = &shoes[1];
 
     // printf("%s %s %s\n", (*outfits[0].top).name, (*outfits[0].bottom).name, (*outfits[0].shoes).name);
