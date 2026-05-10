@@ -108,13 +108,45 @@ void modifyOutfit(struct Outfit outfit)
     printf("[5] Accessory\n");
     printf("[6] Bag\n");
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
-    
+
+    printf("Choice: ");
+    scanf("%d", &option);
+
+    int option_piece;
     switch (option)
     // TODO: Figure a clean way to Implement Display available clothing of the chosen piece
     {
     case 1:
-        
+        // REFACTOR: Ito na muna, hacky I know'
+        int createdApparelSize = 0;
+        for (int i = 0; i < 9; i++)
+        {
+            if (tops[i].name != NULL)
+                createdApparelSize++;
+        }
+
+        printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+        for (int i = 0; i < 9; i++)
+        {
+            if (tops[i].name != NULL)
+            {
+                printf("[%d] %s", i + 1, tops[i].name);
+            }
+        }
+        printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+
+        printf("Choice: ");
+        scanf("%d", &option_piece);
+
+        if (option_piece < 1 || option_piece > createdApparelSize)
+        {
+            printf("ERROR: Invalid Option, Please try again.");
+            break;
+        }
+
+        outfit.top = &tops[option_piece];
         break;
+
     default:
         printf("ERROR: Invalid Option, Please try again.\n");
         return;
@@ -143,7 +175,7 @@ void createOutfitMenu()
     struct Outfit temp_outfit;
 
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
-    printf("Current Outfit Configuration");
+    printf("Current Outfit Configuration\n");
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
 
     // Display Current Outfit Configuration
