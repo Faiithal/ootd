@@ -62,7 +62,8 @@ void modifyTop(struct Outfit *outfit)
         return;
     }
 
-    if(!tops[option_piece - 1].available){
+    if (!tops[option_piece - 1].available)
+    {
         printf("ERROR: Chosen piece is unavailable. Please use an available piece");
         return;
     }
@@ -101,7 +102,8 @@ void modifyBottom(struct Outfit *outfit)
         return;
     }
 
-    if(!bottoms[option_piece - 1].available){
+    if (!bottoms[option_piece - 1].available)
+    {
         printf("ERROR: Chosen piece is unavailable. Please use an available piece");
         return;
     }
@@ -140,7 +142,8 @@ void modifyShoes(struct Outfit *outfit)
         return;
     }
 
-    if(!shoes[option_piece - 1].available){
+    if (!shoes[option_piece - 1].available)
+    {
         printf("ERROR: Chosen piece is unavailable. Please use an available piece");
         return;
     }
@@ -179,7 +182,8 @@ void modifyHeadwear(struct Outfit *outfit)
         return;
     }
 
-    if(!headwears[option_piece - 1].available){
+    if (!headwears[option_piece - 1].available)
+    {
         printf("ERROR: Chosen piece is unavailable. Please use an available piece");
         return;
     }
@@ -218,7 +222,8 @@ void modifyAccessory(struct Outfit *outfit)
         return;
     }
 
-    if(!accessories[option_piece - 1].available){
+    if (!accessories[option_piece - 1].available)
+    {
         printf("ERROR: Chosen piece is unavailable. Please use an available piece");
         return;
     }
@@ -257,7 +262,8 @@ void modifyBag(struct Outfit *outfit)
         return;
     }
 
-    if(!bags[option_piece - 1].available){
+    if (!bags[option_piece - 1].available)
+    {
         printf("ERROR: Chosen piece is unavailable. Please use an available piece");
         return;
     }
@@ -437,7 +443,7 @@ void markOutfitClothesUnavailable(struct Outfit outfit)
 
     if (outfit.bottom != NULL && outfit.bottom->available)
         outfit.bottom->available = 0;
-    
+
     if (outfit.shoes != NULL && outfit.shoes->available)
         outfit.shoes->available = 0;
 
@@ -478,10 +484,10 @@ void pickOOTD()
 
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     printf("Outfit of the day:\n");
-    
+
     snprintf(outfitLabel, sizeof(outfitLabel), "Outfit %d", option);
     displayOutfitEntry(outfits[option - 1], outfitLabel);
-       
+
     markOutfitClothesUnavailable(outfits[option - 1]);
 }
 
@@ -530,7 +536,41 @@ void checkOutfits()
         }
     }
 }
-// TODO: Implement Wash Clothes
+
+// Wash Clothes Feature
+
+void washClothes()
+{
+    for (int i = 0; tops[i].name[0] != '\0'; i++)
+    {
+        tops[i].available = 1;
+    }
+
+    for (int i = 0; bottoms[i].name[0] != '\0'; i++)
+    {
+        bottoms[i].available = 1;
+    }
+
+    for (int i = 0; shoes[i].name[0] != '\0'; i++)
+    {
+        shoes[i].available = 1;
+    }
+
+    for (int i = 0; headwears[i].name[0] != '\0'; i++)
+    {
+        headwears[i].available = 1;
+    }
+
+    for (int i = 0; accessories[i].name[0] != '\0'; i++)
+    {
+        accessories[i].available = 1;
+    }
+
+    for (int i = 0; bags[i].name[0] != '\0'; i++)
+    {
+        bags[i].available = 1;
+    }
+}
 
 int main()
 {
