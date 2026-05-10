@@ -27,7 +27,124 @@ struct Apparel bags[9] = {0};
 struct Outfit outfits[50] = {0};
 int created_outfits_count = 2;
 
+// CHECK CLOSET FEATURE : Validate Choice
+
+int actionMenu_choiceValidation(int numberOfChoices)
+{
+    // retrieves, validates, and returns the int of their corresponding choice
+    int choice = 0;
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    if (choice >= 1 && choice < numberOfChoices)
+        return choice;
+    else
+    {
+        printf("Invalid. Enter an integer corresponding to a choice (1 to %d only).", numberOfChoices);
+        actionMenu_choiceValidation(numberOfChoices);
+    }
+}
+
+// CHECK CLOSET FEATURE : Display Clothing Section 
+
+int chooseClothingSection()
+{
+    printf("nACTION MENU > Check closet > Choose a clothing section\n"
+           "[1] top\t[4] headwear\n"
+           "[2] bottom\t[5] accessory\n"
+           "[3] shoes\t[6] bag\n");
+    return actionMenu_choiceValidation(6);
+}
+
+void displayItems(struct Apparel section[])
+{
+    for (int i = 0; i < 9; i++)
+    {
+        printf("%s", section[i].name);
+    }
+}
+
+void displayClothingSection(
+    int clothingSection_choice,
+    struct Apparel top[],
+    struct Apparel bottom[],
+    struct Apparel shoes[],
+    struct Apparel headwear[],
+    struct Apparel accessory[],
+    struct Apparel bag[])
+{
+
+    switch (clothingSection_choice)
+    {
+    case 1:
+        displayItems(top);
+        break;
+    case 2:
+        displayItems(bottom);
+        break;
+    case 3:
+        displayItems(shoes);
+        break;
+    case 4:
+        displayItems(headwear);
+        break;
+    case 5:
+        displayItems(accessory);
+        break;
+    case 6:
+        displayItems(bag);
+        break;
+    default:
+        break;
+        // do nothing, input already validated
+    }
+}
+
+// CHECK CLOSET FEATURE : Add a Piece to the Section
+
+int chooseAddClothing() {
+    printf("\nACTION MENU > Check closet > Choose a clothing section > section\n"
+            "[1] Add clothing\n"
+            "[2] Back\n");
+    return actionMenu_choiceValidation(2);
+}
+
 // TODO: Implement Check Closet
+
+void checkCloset(
+    struct Apparel top[],
+    struct Apparel bottom[],
+    struct Apparel shoes[],
+    struct Apparel headwear[],
+    struct Apparel accessory[],
+    struct Apparel bag[])
+{
+
+    int checkCloset_menuChoice = 0, clothingSection_choice = 0, addClothing_menuChoice = 0;
+
+    while (1)
+    {
+        printf("\nACTION MENU > Check closet >\n"
+               "[1] Choose a clothing section\n"
+               "[2] Back\n");
+        scanf("%d", &checkCloset_menuChoice);
+
+        switch (checkCloset_menuChoice)
+        {
+        case 1:
+            clothingSection_choice = chooseClothingSection();
+            displayClothingSection(clothingSection_choice, top, bottom, shoes, headwear, accessory, bag);
+            addClothing_menuChoice = chooseAddClothing();
+            if (addClothing_menuChoice == 1)
+                // addClothing(clothingSection_choice, top, bottom, shoes, headwear, accessory, bag);
+                break;
+        case 2:
+            return;
+        default:
+            printf("Invalid. Enter an integer corresponding to a choice only (1-2).\n"
+                   "Try again.\n");
+        }
+    }
+}
 
 // Add Apparel Helper Functions
 void modifyTop(struct Outfit *outfit)
@@ -570,6 +687,8 @@ void washClothes()
     {
         bags[i].available = 1;
     }
+    printf("\n[!] Washing Clothes...\n");
+    printf("[!] All items are now available again!\n");
 }
 
 int main()
@@ -589,8 +708,6 @@ int main()
     strcpy(shoes[1].name, "Converse Shoes");
     shoes[1].available = 1;
 
-    printf("%s\n", tops[0].name);
-
     // Sample Outfit Data
     outfits[0].top = &tops[0];
     outfits[0].bottom = &bottoms[0];
@@ -600,11 +717,50 @@ int main()
     outfits[1].bottom = &bottoms[0];
     outfits[1].shoes = &shoes[1];
 
-    // printf("%s %s %s\n", (*outfits[0].top).name, (*outfits[0].bottom).name, (*outfits[0].shoes).name);
+    // Work by: ANNA L. PARRENO
 
-    // -> version
-    // printf("%s %s %s\n", outfits[1].top->name, outfits[1].bottom->name, outfits[1].shoes->name);
+    char closetName[50];
+    int choice;
 
-    // TODO: Implement Action Menu
-    checkOutfits();
+    // --- START ---
+    printf("==========================================\n");
+    printf("        WELCOME TO DIGITAL CLOSET        \n");
+    printf("==========================================\n");
+    printf("Enter Closet Name: ");
+    scanf(" %[^\n]s", closetName);
+
+    // --- ACTION MENU ---
+    while (1)
+    {
+        printf("\n******************************************\n");
+        printf("    ACTION MENU - %s\n", closetName);
+        printf("******************************************\n");
+        printf(" [1] Check Closet\n");
+        printf(" [2] Check Outfit List\n");
+        printf(" [3] Wash Laundry\n");
+        printf(" [4] Exit\n");
+        printf("------------------------------------------\n");
+        printf("Select Action: ");
+        scanf("%d", &choice);
+
+        if (choice == 1)
+        {
+            // --- CLOSET VIEW ---
+            checkCloset(tops, bottoms, shoes, headwears, accessories, bags);
+        }
+        else if (choice == 2)
+        {
+            // --- OUTFIT LIST ---
+            checkOutfits();
+        }
+        else if (choice == 3)
+        {
+            washClothes();
+        }
+        else if (choice == 4)
+        {
+            printf("\nExiting Program...\n");
+            break;
+        }
+    }
 }
