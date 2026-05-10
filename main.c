@@ -181,7 +181,7 @@ void modifyOutfit(struct Outfit *outfit)
         return;
     }
 
-    // Error 
+    // Error
 }
 
 void copyOutfit(struct Outfit *outfit, struct Outfit temp_outfit)
@@ -339,39 +339,24 @@ void checkOutfits()
     }
 }
 
-// Wash Clothes Feature
+// Wash Laundry Feature
 
-void washClothes()
+void washApparels(struct Apparel apparels[])
 {
-    for (int i = 0; tops[i].name[0] != '\0'; i++)
+    for (int i = 0; apparels[i].name[0] != '\0'; i++)
     {
-        tops[i].available = 1;
+        apparels[i].available = 1;
     }
+}
 
-    for (int i = 0; bottoms[i].name[0] != '\0'; i++)
-    {
-        bottoms[i].available = 1;
-    }
-
-    for (int i = 0; shoes[i].name[0] != '\0'; i++)
-    {
-        shoes[i].available = 1;
-    }
-
-    for (int i = 0; headwears[i].name[0] != '\0'; i++)
-    {
-        headwears[i].available = 1;
-    }
-
-    for (int i = 0; accessories[i].name[0] != '\0'; i++)
-    {
-        accessories[i].available = 1;
-    }
-
-    for (int i = 0; bags[i].name[0] != '\0'; i++)
-    {
-        bags[i].available = 1;
-    }
+void washLaundry()
+{
+    washApparels(tops);
+    washApparels(bottoms);
+    washApparels(shoes);
+    washApparels(headwears);
+    washApparels(accessories);
+    washApparels(bags);
 }
 
 int main()
