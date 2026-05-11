@@ -224,6 +224,16 @@ void createOutfitMenu()
             break;
         case 2:
             // TODO: Create Validation for Outfit Creation (Outfit needs at least a top, bottom, and shoes)
+            if (!(temp_outfit.top != NULL ||
+                  temp_outfit.bottom != NULL ||
+                  temp_outfit.shoes != NULL ||
+                  temp_outfit.headwear != NULL ||
+                  temp_outfit.accessory != NULL ||
+                  temp_outfit.bag != NULL))
+            {
+                printf("ERROR: Outfit doesn't have any piece in it, please add one first!\n");
+                break;
+            }
 
             // Copy Contents of temp_outfit to outfits[i]
             copyOutfit(&outfits[created_outfits_count++], temp_outfit);
@@ -279,9 +289,16 @@ void pickOOTD()
         if (option < 1 || option > created_outfits_count)
         {
             printf("ERROR: Invalid Option, Please try again.\n");
+            continue;
         }
-        else
-            break;
+
+        if (!isOutfitAvailable(outfits[option - 1]))
+        {
+            printf("ERROR: Outfit is unavailable, pick an available outfit\n");
+            continue;
+        }
+
+        break;
     }
 
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
