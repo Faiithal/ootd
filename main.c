@@ -3,7 +3,7 @@
 
 struct Apparel {
     char name[30];
-    int avaiable;
+    int available;
 };
 
 struct Outfit {
@@ -24,7 +24,7 @@ int actionMenu_choiceValidation(int numberOfChoices) {
     scanf("%d", &choice);
     if (choice >= 1 && choice < numberOfChoices) return choice;
     else {
-        printf("Invalid. Enter an integer corresponding to a choice (1 to %d only).", numberOfChoices);
+        printf("Invalid. Enter an integer corresponding to a choice (1 to %d only).\n", numberOfChoices);
         actionMenu_choiceValidation(numberOfChoices);
     }
 }
@@ -33,10 +33,12 @@ int actionMenu_choiceValidation(int numberOfChoices) {
 // CHECK CLOSET FEATURE : Display Clothing Section 
 
 int chooseClothingSection() {
-    printf("nACTION MENU > Check closet > Choose a clothing section\n"
+    printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
+            "ACTION MENU > Check closet > Choose a clothing section\n"
             "[1] top\t[4] headwear\n"
             "[2] bottom\t[5] accessory\n"
-            "[3] shoes\t[6] bag\n");
+            "[3] shoes\t[6] bag\n"
+            "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     return actionMenu_choiceValidation(6); 
 }
 
@@ -85,20 +87,32 @@ void displayClothingSection(
 // CHECK CLOSET FEATURE : Add a Piece to the Section
 
 int chooseAddClothing() {
-    printf("\nACTION MENU > Check closet > Choose a clothing section > section\n"
+    printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
+            "ACTION MENU > Check closet > Choose a clothing section > section\n"
             "[1] Add clothing\n"
-            "[2] Back\n");
+            "[2] Back\n"
+            "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     return actionMenu_choiceValidation(2);
 }
 
 void addItem(struct Apparel section[]) {
-    int sectionSize = sizeof(section) / sizeof(section[0]);
-    char newPiece[30] = {'\0'};
-
-    printf("Enter the clothing to add: ");
-    fgets(newPiece, sizeof(newPiece), stdin);
-    strcpy(section[sectionSize+1].name, newPiece);
+    char item[30] = {'\0'};
+    
+    printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
+            "Enter the clothing to add: ");
     getchar();
+    fgets(item, sizeof(item), stdin);
+    item[strcspn(item, '\n')] = '\0';
+
+    for (int i = 0; i < 9; i++) {
+        if (section[i].name[0] == '\0') {
+            strcpy(section[i].name, item);
+            section[i].available = 1;
+            printf("%s successfullly added.", item);
+            return;
+        }
+    }
+    printf("Section full (MAX 9)! Cannot add any more items.\n");
 }
 
 void addClothing(
@@ -150,9 +164,11 @@ void checkCloset(
     int checkCloset_menuChoice=0, clothingSection_choice=0, addClothing_menuChoice=0;
    
     while (1) {
-        printf("\nACTION MENU > Check closet >\n"
+        printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
+                "ACTION MENU > Check closet >\n"
                 "[1] Choose a clothing section\n"
-                "[2] Back\n");
+                "[2] Back\n"
+                "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
         scanf("%d", &checkCloset_menuChoice);
 
         switch (checkCloset_menuChoice) {
