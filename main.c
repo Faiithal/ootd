@@ -33,7 +33,7 @@ int created_outfits_count = 2;
 int actionMenu_choiceValidation(int numberOfChoices) {
     //retrieves, validates, and returns the int of their corresponding choice
     int choice = 0;
-    printf("Enter choice: ");
+    printf("Choice: ");
     scanf("%d", &choice);
     if (choice >= 1 && choice <= numberOfChoices) return choice;
     else {
@@ -47,7 +47,6 @@ int actionMenu_choiceValidation(int numberOfChoices) {
 
 int chooseClothingSection() {
     printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
-            "ACTION MENU > Check closet > Choose a clothing section\n"
             "[1] top\t[4] headwear\n"
             "[2] bottom\t[5] accessory\n"
             "[3] shoes\t[6] bag\n"
@@ -57,8 +56,9 @@ int chooseClothingSection() {
 
 void displayItems(struct Apparel section[]) {
     for(int i = 0; i < 9; i++) {
-    printf("%s", section[i].name);
+        printf("%s\t", section[i].name);
     }
+    printf("\n");
 }
 
 void displayClothingSection(
@@ -101,7 +101,6 @@ void displayClothingSection(
 
 int chooseAddClothing() {
     printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
-            "ACTION MENU > Check closet > Choose a clothing section > section\n"
             "[1] Add clothing\n"
             "[2] Back\n"
             "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
@@ -121,7 +120,7 @@ void addItem(struct Apparel section[]) {
         if (section[i].name[0] == '\0') {
             strcpy(section[i].name, item);
             section[i].available = 1;
-            printf("%s successfullly added.", item);
+            printf("%s successfullly added.\n", item);
             return;
         }
     }
@@ -178,10 +177,10 @@ void checkCloset(
    
     while (1) {
         printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
-                "ACTION MENU > Check closet >\n"
                 "[1] Choose a clothing section\n"
                 "[2] Back\n"
                 "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+        printf("Choice: ");
         scanf("%d", &checkCloset_menuChoice);
 
         switch (checkCloset_menuChoice) {
