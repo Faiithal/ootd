@@ -577,8 +577,20 @@ int main()
     printf("==========================================\n");
     printf("        WELCOME TO DIGITAL CLOSET        \n");
     printf("==========================================\n");
-    printf("Enter Closet Name: ");
-    scanf(" %[^\n]s", closetName);
+
+    
+    // Checks for current closet thru another file, if it exists, change the value of closetName to current, else create one. 
+    FILE *closet_fp;
+    
+    closet_fp = ("current-closet.txt", "a+");
+
+    if(fscanf(closet_fp, "%s", closetName) <= 0) {
+        printf("Enter Closet Name: ");
+        scanf(" %[^\n]s", closetName);
+        fprintf(closet_fp, "%s", closetName);
+    }
+
+    fclose(closet_fp);
 
     // --- ACTION MENU ---
     while (1)
