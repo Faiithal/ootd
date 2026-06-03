@@ -464,6 +464,8 @@ void pickOOTD()
             break;
     }
 
+    FILE ootd_fp_logs = fopen(, "a");
+
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     printf("Outfit of the day:\n");
 
@@ -582,7 +584,7 @@ int main()
     // Checks for current closet thru another file, if it exists, change the value of closetName to current, else create one. 
     FILE *closet_fp;
     
-    closet_fp = ("current-closet.txt", "a+");
+    closet_fp = ("current-closet", "a+");
 
     if(fscanf(closet_fp, "%s", closetName) <= 0) {
         printf("Enter Closet Name: ");
