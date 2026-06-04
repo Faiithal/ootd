@@ -452,6 +452,11 @@ void markOutfitClothesUnavailable(struct Outfit outfit)
         outfit.bag->available = 0;
 }
 
+void parseLogDate(struct tm *time, char *input)
+{
+    sscanf(input, "%d/%d/%d", &(time->tm_mon), &(time->tm_mday), &(time->tm_year));
+}
+
 void pickOOTD(char *closetName)
 {
     int option;
@@ -477,12 +482,14 @@ void pickOOTD(char *closetName)
             break;
     }
 
+    // REFACTOR: Create a function for logging the OOTD. and Reach end of line function
+
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     printf("Outfit of the day:\n");
-    
+
     snprintf(outfitLabel, sizeof(outfitLabel), "Outfit %d", option);
     displayOutfitEntry(outfits[option - 1], outfitLabel);
-    
+
     char closetLogName[256];
 
     strcpy(closetLogName, closetName);
@@ -495,19 +502,96 @@ void pickOOTD(char *closetName)
         fprintf(ootd_log_fp, "%s %s\n", "outfit_id", "date_worn");
     }
 
-    time_t current_date;
-    struct tm *current_date_ptr;
+    fclose(ootd_log_fp);
 
-    current_date = time(NULL);
-    current_date_ptr = localtime(&current_date);
+    // FOCUS HERE
+    ootd_log_fp = fopen(closetLogName, "r");
 
-    char current_date_str[50];
-    strftime(current_date_str, 50, "%m/%d/%Y", current_date_ptr);
+    char last_outfit_id[256];
+    char last_worn_date_str[256];
 
-    fprintf(ootd_log_fp, "%s %s\n", outfitLabel, current_date_str);
+    fscanf(ootd_log_fp, "%s %s", temp1, temp2);
+
+    while (fscanf(ootd_log_fp, "%s %s", last_outfit_id, last_worn_date_str) > 0);
 
     fclose(ootd_log_fp);
-    
+
+
+    // Grab Current Date and format to MM/DD/YYYY
+    time_t current_date;
+    struct tm *current_date_tm;
+
+    current_date = time(NULL);
+    current_date_tm = localtime(&current_date);
+    char current_date_str[50];
+
+    strftime(current_date_str, 50, "%m/%d/%Y", current_date_tm);
+
+
+    // Check if the last worn_date and current day are the same
+    if (strcmp(current_date_str, last_worn_date_str) != 0)
+    {
+        printf("NOT THE SAME DAY!!!!\n");
+
+        ootd_log_fp = fopen(closetLogName, "a");
+        fprintf(ootd_log_fp, "%d %s\n", option, current_date_str);
+        fclose(ootd_log_fp);
+    }
+    else
+    {
+        printf("SAME DAY!!!!\n");
+        
+        FILE *temp_log;
+        char id_header[50], worn_date_header[50];
+        int id;
+        char closetTempLogName[256];
+        strcpy(closetTempLogName, closetLogName);
+        strcat(closetTempLogName, "-temp");
+
+        temp_log = fopen(closetTempLogName, "w");
+        ootd_log_fp = fopen(closetLogName, "r");
+
+        if (temp_log == NULL || ootd_log_fp == NULL)
+        {
+            printf("Error: Could not open file.\n");
+            return;
+        }
+
+        fscanf(ootd_log_fp, "%s %s", id_header, worn_date_header);
+        fprintf(temp_log, "%s %s\n", id_header, worn_date_header);
+
+        while (fscanf(ootd_log_fp, "%d %s", &id, last_worn_date_str) > 0)
+        {
+            if (strcmp(current_date_str, last_worn_date_str) == 0)
+            {
+                fprintf(temp_log, "%d %s\n", option, last_worn_date_str);
+            }
+            else
+            {
+                fprintf(temp_log, "%d %s\n", id, last_worn_date_str);
+            }
+        }
+
+        fclose(temp_log);
+        fclose(ootd_log_fp);
+
+        temp_log = fopen(closetTempLogName, "r");
+        ootd_log_fp = fopen(closetLogName, "w");
+
+        fscanf(temp_log, "%s %s", id_header, worn_date_header);
+        fprintf(ootd_log_fp, "%s %s\n", id_header, worn_date_header);
+
+        while (fscanf(temp_log, "%d %s\n", &id, last_worn_date_str) > 0)
+        {
+            fprintf(ootd_log_fp, "%d %s\n", id, last_worn_date_str);
+        }
+
+        fclose(temp_log);
+        fclose(ootd_log_fp);
+
+        remove(closetTempLogName);
+    }
+
     markOutfitClothesUnavailable(outfits[option - 1]);
 }
 
