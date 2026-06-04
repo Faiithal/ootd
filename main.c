@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 struct Apparel
 {
@@ -27,35 +28,39 @@ struct Apparel bags[9] = {0};
 struct Outfit outfits[50] = {0};
 int created_outfits_count = 2;
 
-
 // CHECK CLOSET FEATURE : Validate Choice
 
-int actionMenu_choiceValidation(int numberOfChoices) {
-    //retrieves, validates, and returns the int of their corresponding choice
+int actionMenu_choiceValidation(int numberOfChoices)
+{
+    // retrieves, validates, and returns the int of their corresponding choice
     int choice = 0;
     printf("Choice: ");
     scanf("%d", &choice);
-    if (choice >= 1 && choice <= numberOfChoices) return choice;
-    else {
+    if (choice >= 1 && choice <= numberOfChoices)
+        return choice;
+    else
+    {
         printf("Invalid. Enter an integer corresponding to a choice (1 to %d only).\n", numberOfChoices);
         actionMenu_choiceValidation(numberOfChoices);
     }
 }
 
+// CHECK CLOSET FEATURE : Display Clothing Section
 
-// CHECK CLOSET FEATURE : Display Clothing Section 
-
-int chooseClothingSection() {
+int chooseClothingSection()
+{
     printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
-            "[1] top\t[4] headwear\n"
-            "[2] bottom\t[5] accessory\n"
-            "[3] shoes\t[6] bag\n"
-            "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
-    return actionMenu_choiceValidation(6); 
+           "[1] top\t[4] headwear\n"
+           "[2] bottom\t[5] accessory\n"
+           "[3] shoes\t[6] bag\n"
+           "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+    return actionMenu_choiceValidation(6);
 }
 
-void displayItems(struct Apparel section[]) {
-    for(int i = 0; i < 9; i++) {
+void displayItems(struct Apparel section[])
+{
+    for (int i = 0; i < 9; i++)
+    {
         printf("%s\t", section[i].name);
     }
     printf("\n");
@@ -68,7 +73,8 @@ void displayClothingSection(
     struct Apparel shoes[],
     struct Apparel headwear[],
     struct Apparel accessory[],
-    struct Apparel bag[]) {
+    struct Apparel bag[])
+{
 
     switch (clothingSection_choice)
     {
@@ -89,35 +95,38 @@ void displayClothingSection(
         break;
     case 6:
         displayItems(bag);
-        break; 
+        break;
     default:
         break;
-        //do nothing, input already validated
+        // do nothing, input already validated
     }
 }
 
-
 // CHECK CLOSET FEATURE : Add a Piece to the Section
 
-int chooseAddClothing() {
+int chooseAddClothing()
+{
     printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
-            "[1] Add clothing\n"
-            "[2] Back\n"
-            "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+           "[1] Add clothing\n"
+           "[2] Back\n"
+           "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     return actionMenu_choiceValidation(2);
 }
 
-void addItem(struct Apparel section[]) {
+void addItem(struct Apparel section[])
+{
     char item[30] = {'\0'};
-    
+
     printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
-            "Enter the clothing to add: ");
+           "Enter the clothing to add: ");
     getchar();
     fgets(item, sizeof(item), stdin);
     item[strcspn(item, "\n")] = '\0';
 
-    for (int i = 0; i < 9; i++) {
-        if (section[i].name[0] == '\0') {
+    for (int i = 0; i < 9; i++)
+    {
+        if (section[i].name[0] == '\0')
+        {
             strcpy(section[i].name, item);
             section[i].available = 1;
             printf("%s successfullly added.\n", item);
@@ -134,8 +143,9 @@ void addClothing(
     struct Apparel shoes[],
     struct Apparel headwear[],
     struct Apparel accessory[],
-    struct Apparel bag[]) {
-    
+    struct Apparel bag[])
+{
+
     switch (clothingSection_choice)
     {
     case 1:
@@ -155,13 +165,12 @@ void addClothing(
         break;
     case 6:
         addItem(bag);
-        break; 
+        break;
     default:
         break;
-        //do nothing, input already validated
-    }       
+        // do nothing, input already validated
+    }
 }
-
 
 // TODO : Implement Check Closet
 
@@ -171,32 +180,36 @@ void checkCloset(
     struct Apparel shoes[],
     struct Apparel headwear[],
     struct Apparel accessory[],
-    struct Apparel bag[]) {
+    struct Apparel bag[])
+{
 
-    int checkCloset_menuChoice=0, clothingSection_choice=0, addClothing_menuChoice=0;
-   
-    while (1) {
+    int checkCloset_menuChoice = 0, clothingSection_choice = 0, addClothing_menuChoice = 0;
+
+    while (1)
+    {
         printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
-                "[1] Choose a clothing section\n"
-                "[2] Back\n"
-                "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+               "[1] Choose a clothing section\n"
+               "[2] Back\n"
+               "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
         printf("Choice: ");
         scanf("%d", &checkCloset_menuChoice);
 
-        switch (checkCloset_menuChoice) {
+        switch (checkCloset_menuChoice)
+        {
         case 1:
             clothingSection_choice = chooseClothingSection();
             displayClothingSection(clothingSection_choice, top, bottom, shoes, headwear, accessory, bag);
             addClothing_menuChoice = chooseAddClothing();
-            if (addClothing_menuChoice == 1) addClothing(clothingSection_choice, top, bottom, shoes, headwear, accessory, bag);
+            if (addClothing_menuChoice == 1)
+                addClothing(clothingSection_choice, top, bottom, shoes, headwear, accessory, bag);
             break;
         case 2:
             return;
         default:
             printf("Invalid. Enter an integer corresponding to a choice only (1-2).\n"
-                    "Try again.\n");
+                   "Try again.\n");
         }
-    }  
+    }
 }
 
 // Add Apparel Helper Functions
@@ -439,7 +452,7 @@ void markOutfitClothesUnavailable(struct Outfit outfit)
         outfit.bag->available = 0;
 }
 
-void pickOOTD()
+void pickOOTD(char *closetName)
 {
     int option;
     char outfitLabel[50];
@@ -466,14 +479,39 @@ void pickOOTD()
 
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     printf("Outfit of the day:\n");
-
+    
     snprintf(outfitLabel, sizeof(outfitLabel), "Outfit %d", option);
     displayOutfitEntry(outfits[option - 1], outfitLabel);
+    
+    char closetLogName[256];
 
+    strcpy(closetLogName, closetName);
+
+    FILE *ootd_log_fp = fopen(strcat(closetLogName, "-log"), "a+");
+    char temp1[256], temp2[256];
+
+    if (fscanf(ootd_log_fp, "%s %s", temp1, temp2) <= 0)
+    {
+        fprintf(ootd_log_fp, "%s %s\n", "outfit_id", "date_worn");
+    }
+
+    time_t current_date;
+    struct tm *current_date_ptr;
+
+    current_date = time(NULL);
+    current_date_ptr = localtime(&current_date);
+
+    char current_date_str[50];
+    strftime(current_date_str, 50, "%m/%d/%Y", current_date_ptr);
+
+    fprintf(ootd_log_fp, "%s %s\n", outfitLabel, current_date_str);
+
+    fclose(ootd_log_fp);
+    
     markOutfitClothesUnavailable(outfits[option - 1]);
 }
 
-void checkOutfits()
+void checkOutfits(char *closetName)
 {
     while (1)
     {
@@ -508,7 +546,7 @@ void checkOutfits()
             break;
 
         case 2:
-            pickOOTD();
+            pickOOTD(closetName);
             break;
 
         case 3:
@@ -578,13 +616,13 @@ int main()
     printf("        WELCOME TO DIGITAL CLOSET        \n");
     printf("==========================================\n");
 
-    
-    // Checks for current closet thru another file, if it exists, change the value of closetName to current, else create one. 
+    // Checks for current closet thru another file, if it exists, change the value of closetName to current, else create one.
     FILE *closet_fp;
-    
+
     closet_fp = fopen("current-closet", "a+");
 
-    if(fscanf(closet_fp, "%s", closetName) <= 0) {
+    if (fscanf(closet_fp, "%s", closetName) <= 0)
+    {
         printf("Enter Closet Name: ");
         scanf(" %[^\n]s", closetName);
         fprintf(closet_fp, "%s", closetName);
@@ -614,7 +652,7 @@ int main()
         else if (choice == 2)
         {
             // --- OUTFIT LIST ---
-            checkOutfits();
+            checkOutfits(closetName);
         }
         else if (choice == 3)
         {
