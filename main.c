@@ -596,7 +596,104 @@ void copyOutfit(struct Outfit *outfit, struct Outfit temp_outfit)
     (*outfit).bag = temp_outfit.bag;
 }
 
-void createOutfitMenu()
+// Helper for finding index of item in section array
+int findIndex(struct Apparel section[], struct Apparel *item)
+{
+    for (int i = 0; i < 9; i++)
+    {
+        if (&section[i] == item)
+            return i;
+    }
+    return -1;
+}
+
+void saveOutfitsToFile(const char *closetName)
+{
+    char filename[256];
+    snprintf(filename, sizeof(filename), "%s_outfits.txt", closetName);
+
+    FILE *fp = fopen(filename, "w");
+    if (fp == NULL)
+    {
+        printf("Error: Could not open %s for writing.\n", filename);
+        return;
+    }
+
+    // Write header with outfit count
+    fprintf(fp, "outfit_count:%d\n", created_outfits_count);
+
+    // Write each outfit as indices of closet items
+    for (int i = 0; i < created_outfits_count; i++)
+    {
+        fprintf(fp, "%d|%d|%d|%d|%d|%d\n",
+                outfits[i].top != NULL ? findIndex(tops, outfits[i].top) : -1,
+                outfits[i].bottom != NULL ? findIndex(bottoms, outfits[i].bottom) : -1,
+                outfits[i].shoes != NULL ? findIndex(shoes, outfits[i].shoes) : -1,
+                outfits[i].headwear != NULL ? findIndex(headwears, outfits[i].headwear) : -1,
+                outfits[i].accessory != NULL ? findIndex(accessories, outfits[i].accessory) : -1,
+                outfits[i].bag != NULL ? findIndex(bags, outfits[i].bag) : -1);
+    }
+
+    fclose(fp);
+    printf("[!] Outfits saved to %s\n", filename);
+}
+
+// Load outfits from file: [closet_name]_outfits.txt
+void loadOutfitsFromFile(const char *closetName)
+{
+    char filename[256];
+    snprintf(filename, sizeof(filename), "%s_outfits.txt", closetName);
+
+    FILE *fp = fopen(filename, "r");
+    if (fp == NULL)
+    {
+        // File doesn't exist yet - that's okay for first run
+        return;
+    }
+
+    char line[512];
+    int count = 0;
+
+    // Read header line
+    if (fgets(line, sizeof(line), fp) != NULL)
+    {
+        sscanf(line, "outfit_count:%d", &count);
+    }
+
+    // Read each outfit
+    for (int i = 0; i < count && i < 50; i++)
+    {
+        if (fgets(line, sizeof(line), fp) == NULL)
+            break;
+
+        // Remove newline
+        line[strcspn(line, "\n")] = '\0';
+
+        int topIdx = -1, bottomIdx = -1, shoesIdx = -1;
+        int headwearIdx = -1, accessoryIdx = -1, bagIdx = -1;
+
+        // Parse the pipe-delimited line of indices
+        int parsed = sscanf(line, "%d|%d|%d|%d|%d|%d",
+                            &topIdx, &bottomIdx, &shoesIdx, &headwearIdx, &accessoryIdx, &bagIdx);
+
+        if (parsed >= 1)
+        {
+            // Link pointers directly to apparel items in arrays using indices
+            outfits[i].top = (topIdx >= 0 && topIdx < 9 && tops[topIdx].name[0] != '\0') ? &tops[topIdx] : NULL;
+            outfits[i].bottom = (bottomIdx >= 0 && bottomIdx < 9 && bottoms[bottomIdx].name[0] != '\0') ? &bottoms[bottomIdx] : NULL;
+            outfits[i].shoes = (shoesIdx >= 0 && shoesIdx < 9 && shoes[shoesIdx].name[0] != '\0') ? &shoes[shoesIdx] : NULL;
+            outfits[i].headwear = (headwearIdx >= 0 && headwearIdx < 9 && headwears[headwearIdx].name[0] != '\0') ? &headwears[headwearIdx] : NULL;
+            outfits[i].accessory = (accessoryIdx >= 0 && accessoryIdx < 9 && accessories[accessoryIdx].name[0] != '\0') ? &accessories[accessoryIdx] : NULL;
+            outfits[i].bag = (bagIdx >= 0 && bagIdx < 9 && bags[bagIdx].name[0] != '\0') ? &bags[bagIdx] : NULL;
+        }
+    }
+
+    created_outfits_count = count;
+    fclose(fp);
+    printf("[!] Loaded %d outfits from %s\n", count, filename);
+}
+
+void createOutfitMenu(const char *filename)
 {
     struct Outfit temp_outfit = {0};
 
@@ -636,7 +733,10 @@ void createOutfitMenu()
                 }
                 copyOutfit(&outfits[created_outfits_count++], temp_outfit);
                 printf("Outfit Saved Successfully!\n");
-                
+
+                // AUTO-SAVE to file after creating outfit
+                saveOutfitsToFile(filename);
+
                 return;
             }
             else
@@ -653,16 +753,7 @@ void createOutfitMenu()
     //
 }
 
-// Helper for markOutfitClothesUnavailable
-int findIndex(struct Apparel section[], struct Apparel *item)
-{
-    for (int i = 0; i < 9; i++)
-    {
-        if (&section[i] == item)
-            return i;
-    }
-    return -1;
-}
+// Helper findIndex is now defined above saveOutfitsToFile
 
 void markOutfitClothesUnavailable(struct Outfit outfit, const char *filename)
 {
@@ -892,7 +983,7 @@ void checkOutfits(char *filename)
         switch (option)
         {
         case 1:
-            createOutfitMenu();
+            createOutfitMenu(filename);
             break;
 
         case 2:
@@ -989,6 +1080,9 @@ int main()
     {
         fclose(fp);
     }
+
+    loadClosetFile(closetFile, tops, bottoms, shoes, headwears, accessories, bags);
+    loadOutfitsFromFile(closetName);
 
     // --- ACTION MENU ---
     while (1)

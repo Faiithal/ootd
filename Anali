@@ -1,5 +1,5 @@
 TOPS
-T0,White Shirt,0
+T0,White Shirt,1
 T1,
 T2,
 T3,
@@ -9,7 +9,7 @@ T6,
 T7,
 T8,
 BOTTOMS
-B0,Black Pants,0
+B0,Black Pants,1
 B1,
 B2,
 B3,
@@ -19,7 +19,7 @@ B6,
 B7,
 B8,
 SHOES
-S0,Red Shoes,0
+S0,Red Shoes,1
 S1,
 S2,
 S3,
