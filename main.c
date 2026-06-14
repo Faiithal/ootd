@@ -31,16 +31,21 @@ int created_outfits_count = 2;
 
 // CHECK CLOSET FEATURE : Validate Choice
 
-int actionMenu_choiceValidation(int numberOfChoices) {
+int actionMenu_choiceValidation(int numberOfChoices)
+{
     int choice = 0;
     printf("Choice: ");
-    if (scanf("%d", &choice) != 1) {
-        while (getchar() != '\n');
+    if (scanf("%d", &choice) != 1)
+    {
+        while (getchar() != '\n')
+            ;
         printf("Invalid input. Enter an integer corresponding to a choice (1 to %d only).\n", numberOfChoices);
         return actionMenu_choiceValidation(numberOfChoices);
     }
-    if (choice >= 1 && choice <= numberOfChoices) return choice;
-    else {
+    if (choice >= 1 && choice <= numberOfChoices)
+        return choice;
+    else
+    {
         printf("Invalid. Enter an integer corresponding to a choice (1 to %d only).\n", numberOfChoices);
         return actionMenu_choiceValidation(numberOfChoices);
     }
@@ -48,27 +53,29 @@ int actionMenu_choiceValidation(int numberOfChoices) {
 
 // CHECK CLOSET FEATURE : Display Clothing Section
 
-// CHECK CLOSET FEATURE : Display Clothing Section 
+// CHECK CLOSET FEATURE : Display Clothing Section
 
-int chooseClothingSection() {
+int chooseClothingSection()
+{
     printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     printf("%-15s %-15s\n", "[1] top", "[4] headwear");
     printf("%-15s %-15s\n", "[2] bottom", "[5] accessory");
     printf("%-15s %-15s\n", "[3] shoes", "[6] bag");
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
-    return actionMenu_choiceValidation(6); 
+    return actionMenu_choiceValidation(6);
 }
 
-void displayItems(struct Apparel section[]) {
-    if(section[0].name[0] == '\0')
+void displayItems(struct Apparel section[])
+{
+    if (section[0].name[0] == '\0')
         printf("No clothes stored in this section.\n");
-    else 
+    else
     {
-        for(int i = 0; i < 9; i++) 
-        {     
-            if(section[i].name[0] != '\0') 
+        for (int i = 0; i < 9; i++)
+        {
+            if (section[i].name[0] != '\0')
                 printf("[%d] %s (%s)\n", i + 1, section[i].name, section[i].available ? "Available" : "Unavailable");
-            else 
+            else
                 break;
         }
     }
@@ -117,40 +124,77 @@ void loadClosetFile(const char *filename,
                     struct Apparel shoes[],
                     struct Apparel headwears[],
                     struct Apparel accessories[],
-                    struct Apparel bags[]) {
+                    struct Apparel bags[])
+{
     FILE *fp = fopen(filename, "r");
-    if (!fp) return;  // nothing to load yet
+    if (!fp)
+        return; // nothing to load yet
 
     char buffer[256];
     struct Apparel *currentSection = NULL;
     int index = 0;
 
-    while (fgets(buffer, sizeof(buffer), fp)) {
-        buffer[strcspn(buffer, "\n")] = '\0';  
+    while (fgets(buffer, sizeof(buffer), fp))
+    {
+        buffer[strcspn(buffer, "\n")] = '\0';
 
-        if (strcmp(buffer, "TOPS") == 0) { currentSection = tops; index = 0; continue; }
-        if (strcmp(buffer, "BOTTOMS") == 0) { currentSection = bottoms; index = 0; continue; }
-        if (strcmp(buffer, "SHOES") == 0) { currentSection = shoes; index = 0; continue; }
-        if (strcmp(buffer, "HEADWEAR") == 0) { currentSection = headwears; index = 0; continue; }
-        if (strcmp(buffer, "ACCESSORIES") == 0) { currentSection = accessories; index = 0; continue; }
-        if (strcmp(buffer, "BAGS") == 0) { currentSection = bags; index = 0; continue; }
+        if (strcmp(buffer, "TOPS") == 0)
+        {
+            currentSection = tops;
+            index = 0;
+            continue;
+        }
+        if (strcmp(buffer, "BOTTOMS") == 0)
+        {
+            currentSection = bottoms;
+            index = 0;
+            continue;
+        }
+        if (strcmp(buffer, "SHOES") == 0)
+        {
+            currentSection = shoes;
+            index = 0;
+            continue;
+        }
+        if (strcmp(buffer, "HEADWEAR") == 0)
+        {
+            currentSection = headwears;
+            index = 0;
+            continue;
+        }
+        if (strcmp(buffer, "ACCESSORIES") == 0)
+        {
+            currentSection = accessories;
+            index = 0;
+            continue;
+        }
+        if (strcmp(buffer, "BAGS") == 0)
+        {
+            currentSection = bags;
+            index = 0;
+            continue;
+        }
 
-        if (buffer[0] == '\0') continue;
+        if (buffer[0] == '\0')
+            continue;
 
         // Parse line: e.g. "T3,Blue Shirt,1"
         char *firstComma = strchr(buffer, ',');
-        if (firstComma && currentSection) {
+        if (firstComma && currentSection)
+        {
             *firstComma = '\0';
             char *itemName = firstComma + 1;
 
             char *secondComma = strchr(itemName, ',');
             int availableFlag = 1;
-            if (secondComma) {
+            if (secondComma)
+            {
                 *secondComma = '\0';
                 availableFlag = atoi(secondComma + 1);
             }
 
-            if (itemName[0] != '\0') {
+            if (itemName[0] != '\0')
+            {
                 strcpy(currentSection[index].name, itemName);
                 currentSection[index].available = availableFlag;
             }
@@ -160,7 +204,6 @@ void loadClosetFile(const char *filename,
 
     fclose(fp);
 }
-
 
 // CHECK CLOSET FEATURE : Add a Piece to the Section
 
@@ -173,43 +216,65 @@ int chooseAddClothing()
     return actionMenu_choiceValidation(2);
 }
 
-void setupClosetFile(const char *filename) {
+void setupClosetFile(const char *filename)
+{
     FILE *fp = fopen(filename, "w");
-    if (!fp) { perror("Error creating file"); exit(1); }
+    if (!fp)
+    {
+        perror("Error creating file");
+        exit(1);
+    }
 
     fprintf(fp, "TOPS\n");
-    for (int i = 0; i < 9; i++) fprintf(fp, "T%d,\n", i);
+    for (int i = 0; i < 9; i++)
+        fprintf(fp, "T%d,\n", i);
 
     fprintf(fp, "BOTTOMS\n");
-    for (int i = 0; i < 9; i++) fprintf(fp, "B%d,\n", i);
+    for (int i = 0; i < 9; i++)
+        fprintf(fp, "B%d,\n", i);
 
     fprintf(fp, "SHOES\n");
-    for (int i = 0; i < 9; i++) fprintf(fp, "S%d,\n", i);
+    for (int i = 0; i < 9; i++)
+        fprintf(fp, "S%d,\n", i);
 
     fprintf(fp, "HEADWEAR\n");
-    for (int i = 0; i < 9; i++) fprintf(fp, "H%d,\n", i);
+    for (int i = 0; i < 9; i++)
+        fprintf(fp, "H%d,\n", i);
 
     fprintf(fp, "ACCESSORIES\n");
-    for (int i = 0; i < 9; i++) fprintf(fp, "A%d,\n", i);
+    for (int i = 0; i < 9; i++)
+        fprintf(fp, "A%d,\n", i);
 
     fprintf(fp, "BAGS\n");
-    for (int i = 0; i < 9; i++) fprintf(fp, "G%d,\n", i);
+    for (int i = 0; i < 9; i++)
+        fprintf(fp, "G%d,\n", i);
 
     fclose(fp);
 }
 
-void appendItemToFile(char sectionCode, int order, const char *filename, const char *itemName, int availableFlag) {
+void appendItemToFile(char sectionCode, int order, const char *filename, const char *itemName, int availableFlag)
+{
     FILE *fp = fopen(filename, "r");
-    
+
     // If file doesn't exist, create it with template
-    if (!fp) {
+    if (!fp)
+    {
         setupClosetFile(filename);
         fp = fopen(filename, "r");
-        if (!fp) { perror("Error opening file"); exit(1); }
+        if (!fp)
+        {
+            perror("Error opening file");
+            exit(1);
+        }
     }
 
     FILE *tempFp = fopen("temp_closet", "w");
-    if (!tempFp) { perror("Error creating temp file"); fclose(fp); exit(1); }
+    if (!tempFp)
+    {
+        perror("Error creating temp file");
+        fclose(fp);
+        exit(1);
+    }
 
     char buffer[256];
     char target[10];
@@ -217,11 +282,15 @@ void appendItemToFile(char sectionCode, int order, const char *filename, const c
     int found = 0;
 
     // Copy file, replacing the matching line
-    while (fgets(buffer, sizeof(buffer), fp)) {
-        if (!found && strncmp(buffer, target, strlen(target)) == 0) {
+    while (fgets(buffer, sizeof(buffer), fp))
+    {
+        if (!found && strncmp(buffer, target, strlen(target)) == 0)
+        {
             fprintf(tempFp, "%c%d,%s,%d\n", sectionCode, order, itemName, availableFlag);
             found = 1;
-        } else {
+        }
+        else
+        {
             fputs(buffer, tempFp);
         }
     }
@@ -234,7 +303,8 @@ void appendItemToFile(char sectionCode, int order, const char *filename, const c
     rename("temp_closet", filename);
 }
 
-void updateClosetFile(const char *filename, const char *sectionName, int i, const char *itemName, int availableFlag) {
+void updateClosetFile(const char *filename, const char *sectionName, int i, const char *itemName, int availableFlag)
+{
     if (strcmp(sectionName, "top") == 0)
         appendItemToFile('T', i, filename, itemName, availableFlag);
     else if (strcmp(sectionName, "bottom") == 0)
@@ -249,10 +319,11 @@ void updateClosetFile(const char *filename, const char *sectionName, int i, cons
         appendItemToFile('G', i, filename, itemName, availableFlag);
 }
 
-void addItem(struct Apparel section[], const char *filename, const char *sectionName) {
+void addItem(struct Apparel section[], const char *filename, const char *sectionName)
+{
     char item[30] = {'\0'};
     char fullFilename[100];
-    
+
     printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
            "Enter the clothing to add: ");
     getchar();
@@ -261,8 +332,10 @@ void addItem(struct Apparel section[], const char *filename, const char *section
 
     snprintf(fullFilename, sizeof(fullFilename), "%s", filename);
 
-    for (int i = 0; i < 9; i++) {
-        if (section[i].name[0] == '\0') {
+    for (int i = 0; i < 9; i++)
+    {
+        if (section[i].name[0] == '\0')
+        {
             strncpy(section[i].name, item, sizeof(section[i].name) - 1);
             section[i].name[sizeof(section[i].name) - 1] = '\0';
             section[i].available = 1;
@@ -282,8 +355,9 @@ void addClothing(
     struct Apparel headwear[],
     struct Apparel accessory[],
     struct Apparel bag[],
-    char *closetName) {
-    
+    char *closetName)
+{
+
     switch (clothingSection_choice)
     {
     case 1:
@@ -303,7 +377,7 @@ void addClothing(
         break;
     case 6:
         addItem(bag, closetName, "bag");
-        break; 
+        break;
     default:
         break;
         // do nothing, input already validated
@@ -319,11 +393,14 @@ void checkCloset(
     struct Apparel headwear[],
     struct Apparel accessory[],
     struct Apparel bag[],
-    char *closetName) {
+    char *closetName)
+{
 
     char closetFile[100];
     snprintf(closetFile, sizeof(closetFile), "%s", closetName);
     loadClosetFile(closetFile, top, bottom, shoes, headwear, accessory, bag);
+
+    int checkCloset_menuChoice = 0, clothingSection_choice = 0, addClothing_menuChoice = 0;
 
     while (1)
     {
@@ -340,7 +417,7 @@ void checkCloset(
             clothingSection_choice = chooseClothingSection();
             displayClothingSection(clothingSection_choice, top, bottom, shoes, headwear, accessory, bag);
             addClothing_menuChoice = chooseAddClothing();
-            if (addClothing_menuChoice == 1) 
+            if (addClothing_menuChoice == 1)
                 addClothing(clothingSection_choice, top, bottom, shoes, headwear, accessory, bag, closetName);
             break;
         case 2:
@@ -351,7 +428,6 @@ void checkCloset(
         }
     }
 }
-
 
 // Add Apparel Helper Functions
 
@@ -395,7 +471,6 @@ struct Apparel *chooseOutfitApparel(struct Outfit *outfit, struct Apparel appare
 
     return &apparels[option_piece - 1];
 }
-
 
 // Outfit Helper Functions
 
@@ -463,7 +538,6 @@ int displayOutfitEntry(struct Outfit outfit, char outfitLabel[])
 
     printf("\n");
 }
-
 
 // Outfit Main Features
 
@@ -555,7 +629,8 @@ void createOutfitMenu()
                 temp_outfit.bottom != NULL &&
                 temp_outfit.shoes != NULL)
             {
-                if (created_outfits_count >= 50) {
+                if (created_outfits_count >= 50)
+                {
                     printf("ERROR: Maximum outfits reached (50)!\n");
                     break;
                 }
@@ -563,7 +638,8 @@ void createOutfitMenu()
                 printf("Outfit Saved Successfully!\n");
                 return;
             }
-            else {
+            else
+            {
                 printf("ERROR: Outfit must have at least a top, bottom, and shoes!\n");
                 break;
             }
@@ -577,50 +653,66 @@ void createOutfitMenu()
 }
 
 // Helper for markOutfitClothesUnavailable
-int findIndex(struct Apparel section[], struct Apparel *item) {
-    for (int i = 0; i < 9; i++) {
-        if (&section[i] == item) return i;
+int findIndex(struct Apparel section[], struct Apparel *item)
+{
+    for (int i = 0; i < 9; i++)
+    {
+        if (&section[i] == item)
+            return i;
     }
     return -1;
 }
 
-void markOutfitClothesUnavailable(struct Outfit outfit, const char *filename) {
+void markOutfitClothesUnavailable(struct Outfit outfit, const char *filename)
+{
     int idx;
 
-    if (outfit.top != NULL && outfit.top->available) {
+    if (outfit.top != NULL && outfit.top->available)
+    {
         outfit.top->available = 0;
         idx = findIndex(tops, outfit.top);
-        if (idx >= 0) updateClosetFile(filename, "top", idx, outfit.top->name, 0);
+        if (idx >= 0)
+            updateClosetFile(filename, "top", idx, outfit.top->name, 0);
     }
 
-    if (outfit.bottom != NULL && outfit.bottom->available) {
+    if (outfit.bottom != NULL && outfit.bottom->available)
+    {
         outfit.bottom->available = 0;
         idx = findIndex(bottoms, outfit.bottom);
-        if (idx >= 0) updateClosetFile(filename, "bottom", idx, outfit.bottom->name, 0);
+        if (idx >= 0)
+            updateClosetFile(filename, "bottom", idx, outfit.bottom->name, 0);
     }
 
-    if (outfit.shoes != NULL && outfit.shoes->available) {
+    if (outfit.shoes != NULL && outfit.shoes->available)
+    {
         outfit.shoes->available = 0;
         idx = findIndex(shoes, outfit.shoes);
-        if (idx >= 0) updateClosetFile(filename, "shoes", idx, outfit.shoes->name, 0);
+        if (idx >= 0)
+            updateClosetFile(filename, "shoes", idx, outfit.shoes->name, 0);
     }
 
-    if (outfit.headwear != NULL && outfit.headwear->available) {
+    if (outfit.headwear != NULL && outfit.headwear->available)
+    {
         outfit.headwear->available = 0;
         idx = findIndex(headwears, outfit.headwear);
-        if (idx >= 0) updateClosetFile(filename, "headwear", idx, outfit.headwear->name, 0);
+        if (idx >= 0)
+            updateClosetFile(filename, "headwear", idx, outfit.headwear->name, 0);
     }
 
-    if (outfit.accessory != NULL && outfit.accessory->available) {
+    if (outfit.accessory != NULL && outfit.accessory->available)
+    {
         outfit.accessory->available = 0;
         idx = findIndex(accessories, outfit.accessory);
-        if (idx >= 0) updateClosetFile(filename, "accessory", idx, outfit.accessory->name, 0);
+        if (idx >= 0)
+            updateClosetFile(filename, "accessory", idx, outfit.accessory->name, 0);
     }
 
-    if (outfit.bag != NULL && outfit.bag->available) {
+    if (outfit.bag != NULL && outfit.bag->available)
+    {
         outfit.bag->available = 0;
         idx = findIndex(bags, outfit.bag);
-        if (idx >= 0) updateClosetFile(filename, "bag", idx, outfit.bag->name, 0);
+        if (idx >= 0)
+            updateClosetFile(filename, "bag", idx, outfit.bag->name, 0);
     }
 }
 
@@ -679,10 +771,10 @@ void pickOOTD(const char *filename)
 
     fscanf(ootd_log_fp, "%s %s", temp1, temp2);
 
-    while (fscanf(ootd_log_fp, "%s %s", last_outfit_id, last_worn_date_str) > 0);
+    while (fscanf(ootd_log_fp, "%s %s", last_outfit_id, last_worn_date_str) > 0)
+        ;
 
     fclose(ootd_log_fp);
-
 
     // Grab Current Date and format to MM/DD/YYYY
     time_t current_date;
@@ -693,7 +785,6 @@ void pickOOTD(const char *filename)
     char current_date_str[50];
 
     strftime(current_date_str, 50, "%m/%d/%Y", current_date_tm);
-
 
     // Check if the last worn_date and current day are the same
     if (strcmp(current_date_str, last_worn_date_str) != 0)
@@ -707,7 +798,7 @@ void pickOOTD(const char *filename)
     else
     {
         printf("SAME DAY!!!!\n");
-        
+
         FILE *temp_log;
         char id_header[50], worn_date_header[50];
         int id;
@@ -759,7 +850,7 @@ void pickOOTD(const char *filename)
         remove(closetTempLogName);
     }
 
-    markOutfitClothesUnavailable(outfits[option - 1]);
+    markOutfitClothesUnavailable(outfits[option - 1], filename);
 }
 
 void checkOutfits(char *filename)
@@ -808,17 +899,19 @@ void checkOutfits(char *filename)
     }
 }
 
-
 // Wash Laundry Feature
 
-void washApparels(struct Apparel apparels[], const char *filename, const char *sectionName) {
-    for (int i = 0; apparels[i].name[0] != '\0'; i++) {
+void washApparels(struct Apparel apparels[], const char *filename, const char *sectionName)
+{
+    for (int i = 0; apparels[i].name[0] != '\0'; i++)
+    {
         apparels[i].available = 1;
         updateClosetFile(filename, sectionName, i, apparels[i].name, 1);
     }
 }
 
-void washLaundry(const char *filename) {
+void washLaundry(const char *filename)
+{
     washApparels(tops, filename, "top");
     washApparels(bottoms, filename, "bottom");
     washApparels(shoes, filename, "shoes");
@@ -829,7 +922,6 @@ void washLaundry(const char *filename) {
     printf("\n[!] Washing Clothes...\n");
     printf("[!] All items are now available again!\n");
 }
-
 
 int main()
 {
@@ -846,7 +938,7 @@ int main()
     strcpy(shoes[0].name, "Adidas Sambas");
     shoes[0].available = 1;
     strcpy(shoes[1].name, "Converse Shoes");
-    shoes[1].available = 1; 
+    shoes[1].available = 1;
 
     // Sample Outfit Data
     outfits[0].top = &tops[0];
@@ -856,7 +948,6 @@ int main()
     outfits[1].top = &tops[1];
     outfits[1].bottom = &bottoms[0];
     outfits[1].shoes = &shoes[1]; */
-
 
     char closetName[50];
     int choice;
@@ -882,9 +973,12 @@ int main()
     snprintf(closetFile, sizeof(closetFile), "%s", closetName);
 
     FILE *fp = fopen(closetFile, "r");
-    if (!fp) {
-        setupClosetFile(closetFile);  // create with placeholders
-    } else {
+    if (!fp)
+    {
+        setupClosetFile(closetFile); // create with placeholders
+    }
+    else
+    {
         fclose(fp);
     }
 
