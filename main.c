@@ -439,7 +439,7 @@ void checkCloset(
 
 // Add Apparel Helper Functions
 
-struct Apparel *chooseOutfitApparel(struct Outfit *outfit, struct Apparel apparels[])
+struct Apparel *chooseOutfitApparel(struct Apparel apparels[])
 {
     int option_piece;
     int createdApparelSize = 0;
@@ -513,7 +513,7 @@ int isOutfitAvailable(struct Outfit outfit)
     return 1;
 }
 
-int displayOutfitEntry(struct Outfit outfit, char outfitLabel[])
+void displayOutfitEntry(struct Outfit outfit, char outfitLabel[])
 {
     printf("( %s )", isOutfitAvailable(outfit) ? "Available" : "Unavailable");
 
@@ -569,22 +569,22 @@ void modifyOutfit(struct Outfit *outfit)
     switch (option)
     {
     case 1:
-        (*outfit).top = chooseOutfitApparel(outfit, tops);
+        (*outfit).top = chooseOutfitApparel(tops);
         break;
     case 2:
-        (*outfit).bottom = chooseOutfitApparel(outfit, bottoms);
+        (*outfit).bottom = chooseOutfitApparel(bottoms);
         break;
     case 3:
-        (*outfit).shoes = chooseOutfitApparel(outfit, shoes);
+        (*outfit).shoes = chooseOutfitApparel(shoes);
         break;
     case 4:
-        (*outfit).headwear = chooseOutfitApparel(outfit, headwears);
+        (*outfit).headwear = chooseOutfitApparel(headwears);
         break;
     case 5:
-        (*outfit).accessory = chooseOutfitApparel(outfit, accessories);
+        (*outfit).accessory = chooseOutfitApparel(accessories);
         break;
     case 6:
-        (*outfit).bag = chooseOutfitApparel(outfit, bags);
+        (*outfit).bag = chooseOutfitApparel(bags);
         break;
     default:
         printf("ERROR: Invalid Option, Please try again.\n");
@@ -821,17 +821,46 @@ void pickOOTD(const char *filename)
     int option;
     char outfitLabel[50];
 
+    if (created_outfits_count == 0)
+    {
+        printf("No outfits available. Create one first!\n");
+        return;
+    }
+
+    int anyAvailable = 0;
     for (int i = 0; i < created_outfits_count; i++)
     {
+        if (isOutfitAvailable(outfits[i]))
+        {
+            anyAvailable = 1;
+        }
         snprintf(outfitLabel, sizeof(outfitLabel), "Outfit %d", i + 1);
-        printf("[%d] %s\n", i + 1, outfitLabel);
+        printf("[%d] ", i + 1);
+        displayOutfitEntry(outfits[i], outfitLabel);
+    }
+    printf("[%d] Back\n", created_outfits_count + 1);
+
+    if (!anyAvailable)
+    {
+        printf("\n[!] WARNING: All outfits are currently unavailable. Wash laundry to make them available again.\n");
     }
 
     while (1)
     {
         printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
         printf("Pick an outfit: ");
-        scanf("%d", &option);
+        if (scanf("%d", &option) != 1)
+        {
+            while (getchar() != '\n')
+                ;
+            printf("Invalid input. Enter an integer corresponding to an outfit or %d to go back.\n", created_outfits_count + 1);
+            continue;
+        }
+
+        if (option == created_outfits_count + 1)
+        {
+            return;
+        }
 
         if (option < 1 || option > created_outfits_count)
         {
@@ -873,8 +902,8 @@ void pickOOTD(const char *filename)
     // FOCUS HERE
     ootd_log_fp = fopen(closetLogName, "r");
 
-    char last_outfit_id[256];
-    char last_worn_date_str[256];
+    char last_outfit_id[256] = {0};
+    char last_worn_date_str[256] = {0};
 
     fscanf(ootd_log_fp, "%s %s", temp1, temp2);
 
