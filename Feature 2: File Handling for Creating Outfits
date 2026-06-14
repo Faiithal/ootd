@@ -1,0 +1,190 @@
+// ============================================================
+// FEATURE 2: FILE HANDLING FOR OUTFIT CREATION - Anna's Part
+// File: outfit_file_handler.c
+// ============================================================
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+// External references to JM's existing structures and globals
+extern struct Apparel tops[9];
+extern struct Apparel bottoms[9];
+extern struct Apparel shoes[9];
+extern struct Apparel headwears[9];
+extern struct Apparel accessories[9];
+extern struct Apparel bags[9];
+extern struct Outfit outfits[50];
+extern int created_outfits_count;
+
+// Helper: Find apparel index by name in a given array
+int findApparelIndex(struct Apparel apparels[], const char *name) {
+    for (int i = 0; i < 9; i++) {
+        if (strcmp(apparels[i].name, name) == 0) {
+            return i;
+        }
+    }
+    return -1; // Not found
+}
+
+// Save all outfits to file: [closet_name]_outfits.txt
+// Format per line: top_name|bottom_name|shoes_name|headwear_name|accessory_name|bag_name
+void saveOutfitsToFile(const char *closetName) {
+    char filename[256];
+    snprintf(filename, sizeof(filename), "%s_outfits.txt", closetName);
+    
+    FILE *fp = fopen(filename, "w");
+    if (fp == NULL) {
+        printf("Error: Could not open %s for writing.\n", filename);
+        return;
+    }
+    
+    // Write header with outfit count
+    fprintf(fp, "outfit_count:%d\n", created_outfits_count);
+    
+    // Write each outfit
+    for (int i = 0; i < created_outfits_count; i++) {
+        fprintf(fp, "%s|%s|%s|%s|%s|%s\n",
+            outfits[i].top != NULL ? outfits[i].top->name : "NULL",
+            outfits[i].bottom != NULL ? outfits[i].bottom->name : "NULL",
+            outfits[i].shoes != NULL ? outfits[i].shoes->name : "NULL",
+            outfits[i].headwear != NULL ? outfits[i].headwear->name : "NULL",
+            outfits[i].accessory != NULL ? outfits[i].accessory->name : "NULL",
+            outfits[i].bag != NULL ? outfits[i].bag->name : "NULL"
+        );
+    }
+    
+    fclose(fp);
+    printf("[!] Outfits saved to %s\n", filename);
+}
+
+// Load outfits from file: [closet_name]_outfits.txt
+void loadOutfitsFromFile(const char *closetName) {
+    char filename[256];
+    snprintf(filename, sizeof(filename), "%s_outfits.txt", closetName);
+    
+    FILE *fp = fopen(filename, "r");
+    if (fp == NULL) {
+        // File doesn't exist yet - that's okay for first run
+        return;
+    }
+    
+    char line[512];
+    int count = 0;
+    
+    // Read header line
+    if (fgets(line, sizeof(line), fp) != NULL) {
+        sscanf(line, "outfit_count:%d", &count);
+    }
+    
+    // Read each outfit
+    for (int i = 0; i < count && i < 50; i++) {
+        if (fgets(line, sizeof(line), fp) == NULL) break;
+        
+        // Remove newline
+        line[strcspn(line, "\n")] = '\0';
+        
+        char topName[30], bottomName[30], shoesName[30];
+        char headwearName[30], accessoryName[30], bagName[30];
+        
+        // Parse the pipe-delimited line
+        int parsed = sscanf(line, "%29[^|]|%29[^|]|%29[^|]|%29[^|]|%29[^|]|%29[^\n]",
+            topName, bottomName, shoesName, headwearName, accessoryName, bagName);
+        
+        if (parsed >= 1) {
+            // Link pointers to actual apparel items
+            int idx;
+            
+            if (strcmp(topName, "NULL") != 0) {
+                idx = findApparelIndex(tops, topName);
+                outfits[i].top = (idx >= 0) ? &tops[idx] : NULL;
+            } else {
+                outfits[i].top = NULL;
+            }
+            
+            if (strcmp(bottomName, "NULL") != 0) {
+                idx = findApparelIndex(bottoms, bottomName);
+                outfits[i].bottom = (idx >= 0) ? &bottoms[idx] : NULL;
+            } else {
+                outfits[i].bottom = NULL;
+            }
+            
+            if (strcmp(shoesName, "NULL") != 0) {
+                idx = findApparelIndex(shoes, shoesName);
+                outfits[i].shoes = (idx >= 0) ? &shoes[idx] : NULL;
+            } else {
+                outfits[i].shoes = NULL;
+            }
+            
+            if (strcmp(headwearName, "NULL") != 0) {
+                idx = findApparelIndex(headwears, headwearName);
+                outfits[i].headwear = (idx >= 0) ? &headwears[idx] : NULL;
+            } else {
+                outfits[i].headwear = NULL;
+            }
+            
+            if (strcmp(accessoryName, "NULL") != 0) {
+                idx = findApparelIndex(accessories, accessoryName);
+                outfits[i].accessory = (idx >= 0) ? &accessories[idx] : NULL;
+            } else {
+                outfits[i].accessory = NULL;
+            }
+            
+            if (strcmp(bagName, "NULL") != 0) {
+                idx = findApparelIndex(bags, bagName);
+                outfits[i].bag = (idx >= 0) ? &bags[idx] : NULL;
+            } else {
+                outfits[i].bag = NULL;
+            }
+        }
+    }
+    
+    created_outfits_count = count;
+    fclose(fp);
+    printf("[!] Loaded %d outfits from %s\n", count, filename);
+}
+
+// Modified createOutfitMenu that auto-saves after creating
+void createOutfitMenuWithSave(const char *closetName) {
+    struct Outfit temp_outfit = {0};
+    
+    while (1) {
+        printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+        printf("Current Outfit Configuration\n");
+        printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n");
+        
+        displayOutfitEntry(temp_outfit, "Outfit");
+        
+        int option = 0;
+        printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+        printf("[1] Add/Overwrite a clothing piece\n");
+        printf("[2] Save Outfit\n");
+        printf("[3] Back\n");
+        printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+        printf("Choice: ");
+        scanf("%d", &option);
+        
+        switch (option) {
+            case 1:
+                modifyOutfit(&temp_outfit);
+                break;
+            case 2:
+                if (!(temp_outfit.top != NULL || temp_outfit.bottom != NULL || 
+                      temp_outfit.shoes != NULL || temp_outfit.headwear != NULL || 
+                      temp_outfit.accessory != NULL || temp_outfit.bag != NULL)) {
+                    printf("ERROR: Outfit doesn't have any piece in it!\n");
+                    break;
+                }
+                copyOutfit(&outfits[created_outfits_count++], temp_outfit);
+                printf("Outfit Saved Successfully!\n");
+                
+                // AUTO-SAVE to file after creating outfit
+                saveOutfitsToFile(closetName);
+                return;
+            case 3:
+                return;
+            default:
+                printf("ERROR: Invalid Option, Please try again.\n");
+        }
+    }
+}
