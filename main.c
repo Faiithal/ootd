@@ -32,10 +32,13 @@ int created_outfits_count = 2;
 // CHECK CLOSET FEATURE : Validate Choice
 
 int actionMenu_choiceValidation(int numberOfChoices) {
-    //retrieves, validates, and returns the int of their corresponding choice
     int choice = 0;
     printf("Choice: ");
-    scanf("%d", &choice);
+    if (scanf("%d", &choice) != 1) {
+        while (getchar() != '\n');
+        printf("Invalid input. Enter an integer corresponding to a choice (1 to %d only).\n", numberOfChoices);
+        return actionMenu_choiceValidation(numberOfChoices);
+    }
     if (choice >= 1 && choice <= numberOfChoices) return choice;
     else {
         printf("Invalid. Enter an integer corresponding to a choice (1 to %d only).\n", numberOfChoices);
@@ -63,7 +66,7 @@ void displayItems(struct Apparel section[]) {
         for(int i = 0; i < 9; i++) 
         {     
             if(section[i].name[0] != '\0') 
-                printf("%s\n", section[i].name);
+                printf("[%d] %s (%s)\n", i + 1, section[i].name, section[i].available ? "Available" : "Unavailable");
             else 
                 break;
         }
@@ -193,23 +196,39 @@ void setupClosetFile(const char *filename) {
 }
 
 void appendItemToFile(char sectionCode, int order, const char *filename, const char *itemName, int availableFlag) {
-    FILE *fp = fopen(filename, "r+");
-    if (!fp) { perror("Error opening file"); exit(1); }
+    FILE *fp = fopen(filename, "r");
+    
+    // If file doesn't exist, create it with template
+    if (!fp) {
+        setupClosetFile(filename);
+        fp = fopen(filename, "r");
+        if (!fp) { perror("Error opening file"); exit(1); }
+    }
+
+    FILE *tempFp = fopen("temp_closet", "w");
+    if (!tempFp) { perror("Error creating temp file"); fclose(fp); exit(1); }
 
     char buffer[256];
-    long pos;
     char target[10];
     snprintf(target, sizeof(target), "%c%d,", sectionCode, order);
+    int found = 0;
 
-    while ((pos = ftell(fp)), fgets(buffer, sizeof(buffer), fp)) {
-        if (strncmp(buffer, target, strlen(target)) == 0) {
-            fseek(fp, pos, SEEK_SET);  // rewind to start of this line
-            fprintf(fp, "%c%d,%s,%d\n", sectionCode, order, itemName, availableFlag);
-            break;
+    // Copy file, replacing the matching line
+    while (fgets(buffer, sizeof(buffer), fp)) {
+        if (!found && strncmp(buffer, target, strlen(target)) == 0) {
+            fprintf(tempFp, "%c%d,%s,%d\n", sectionCode, order, itemName, availableFlag);
+            found = 1;
+        } else {
+            fputs(buffer, tempFp);
         }
     }
 
     fclose(fp);
+    fclose(tempFp);
+
+    // Replace original file with temp file
+    remove(filename);
+    rename("temp_closet", filename);
 }
 
 void updateClosetFile(const char *filename, const char *sectionName, int i, const char *itemName, int availableFlag) {
@@ -229,6 +248,7 @@ void updateClosetFile(const char *filename, const char *sectionName, int i, cons
 
 void addItem(struct Apparel section[], const char *filename, const char *sectionName) {
     char item[30] = {'\0'};
+    char fullFilename[100];
     
     printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
             "Enter the clothing to add: ");
@@ -236,11 +256,14 @@ void addItem(struct Apparel section[], const char *filename, const char *section
     fgets(item, sizeof(item), stdin);
     item[strcspn(item, "\n")] = '\0';
 
+    snprintf(fullFilename, sizeof(fullFilename), "%s", filename);
+
     for (int i = 0; i < 9; i++) {
         if (section[i].name[0] == '\0') {
-            strcpy(section[i].name, item);
+            strncpy(section[i].name, item, sizeof(section[i].name) - 1);
+            section[i].name[sizeof(section[i].name) - 1] = '\0';
             section[i].available = 1;
-            updateClosetFile(filename, sectionName, i, item, 1);
+            updateClosetFile(fullFilename, sectionName, i, item, 1);
             printf("%s successfully added.\n", item);
             return;
         }
@@ -297,7 +320,7 @@ void checkCloset(
     char *closetName) {
 
     char closetFile[100];
-    snprintf(closetFile, sizeof(closetFile), "%s.txt", closetName);
+    snprintf(closetFile, sizeof(closetFile), "%s", closetName);
     loadClosetFile(closetFile, top, bottom, shoes, headwear, accessory, bag);
 
     int checkCloset_menuChoice=0, clothingSection_choice=0, addClothing_menuChoice=0;
@@ -397,7 +420,7 @@ int isOutfitAvailable(struct Outfit outfit)
     {
         return 0;
     }
-    if (outfit.accessory != NULL && !outfit.bag->available)
+    if (outfit.bag != NULL && !outfit.bag->available)
     {
         return 0;
     }
@@ -526,22 +549,22 @@ void createOutfitMenu()
             modifyOutfit(&temp_outfit);
             break;
         case 2:
-            // TODO: Create Validation for Outfit Creation (Outfit needs at least a top, bottom, and shoes)
-            if (!(temp_outfit.top != NULL ||
-                  temp_outfit.bottom != NULL ||
-                  temp_outfit.shoes != NULL ||
-                  temp_outfit.headwear != NULL ||
-                  temp_outfit.accessory != NULL ||
-                  temp_outfit.bag != NULL))
+            if (temp_outfit.top != NULL &&
+                temp_outfit.bottom != NULL &&
+                temp_outfit.shoes != NULL)
             {
-                printf("ERROR: Outfit doesn't have any piece in it, please add one first!\n");
+                if (created_outfits_count >= 50) {
+                    printf("ERROR: Maximum outfits reached (50)!\n");
+                    break;
+                }
+                copyOutfit(&outfits[created_outfits_count++], temp_outfit);
+                printf("Outfit Saved Successfully!\n");
+                return;
+            }
+            else {
+                printf("ERROR: Outfit must have at least a top, bottom, and shoes!\n");
                 break;
             }
-
-            // Copy Contents of temp_outfit to outfits[i]
-            copyOutfit(&outfits[created_outfits_count++], temp_outfit);
-            printf("Outfit Saved Successfully!\n");
-            return;
         case 3:
             return;
         default:
@@ -750,11 +773,11 @@ int main()
     }
 
     char closetFile[100];
-    snprintf(closetFile, sizeof(closetFile), "%s.txt", closetName);
+    snprintf(closetFile, sizeof(closetFile), "%s", closetName);
 
     FILE *fp = fopen(closetFile, "r");
     if (!fp) {
-        setupClosetFile(closetFile); 
+        setupClosetFile(closetFile);  // create with placeholders
     } else {
         fclose(fp);
     }
@@ -776,7 +799,7 @@ int main()
         if (choice == 1)
         {
             // --- CLOSET VIEW ---
-            checkCloset(tops, bottoms, shoes, headwears, accessories, bags, closetName);
+            checkCloset(tops, bottoms, shoes, headwears, accessories, bags, closetFile);
         }
         else if (choice == 2)
         {
