@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include <stdlib.h>
 
 struct Apparel
@@ -28,7 +29,6 @@ struct Apparel bags[9] = {0};
 struct Outfit outfits[50] = {0};
 int created_outfits_count = 2;
 
-
 // CHECK CLOSET FEATURE : Validate Choice
 
 int actionMenu_choiceValidation(int numberOfChoices) {
@@ -46,6 +46,7 @@ int actionMenu_choiceValidation(int numberOfChoices) {
     }
 }
 
+// CHECK CLOSET FEATURE : Display Clothing Section
 
 // CHECK CLOSET FEATURE : Display Clothing Section 
 
@@ -81,7 +82,8 @@ void displayClothingSection(
     struct Apparel shoes[],
     struct Apparel headwear[],
     struct Apparel accessory[],
-    struct Apparel bag[]) {
+    struct Apparel bag[])
+{
 
     switch (clothingSection_choice)
     {
@@ -102,10 +104,10 @@ void displayClothingSection(
         break;
     case 6:
         displayItems(bag);
-        break; 
+        break;
     default:
         break;
-        //do nothing, input already validated
+        // do nothing, input already validated
     }
 }
 
@@ -162,11 +164,12 @@ void loadClosetFile(const char *filename,
 
 // CHECK CLOSET FEATURE : Add a Piece to the Section
 
-int chooseAddClothing() {
+int chooseAddClothing()
+{
     printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
-            "[1] Add clothing\n"
-            "[2] Back\n"
-            "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+           "[1] Add clothing\n"
+           "[2] Back\n"
+           "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     return actionMenu_choiceValidation(2);
 }
 
@@ -251,7 +254,7 @@ void addItem(struct Apparel section[], const char *filename, const char *section
     char fullFilename[100];
     
     printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
-            "Enter the clothing to add: ");
+           "Enter the clothing to add: ");
     getchar();
     fgets(item, sizeof(item), stdin);
     item[strcspn(item, "\n")] = '\0';
@@ -303,10 +306,9 @@ void addClothing(
         break; 
     default:
         break;
-        //do nothing, input already validated
-    }       
+        // do nothing, input already validated
+    }
 }
-
 
 // TODO : Implement Check Closet
 
@@ -323,17 +325,17 @@ void checkCloset(
     snprintf(closetFile, sizeof(closetFile), "%s", closetName);
     loadClosetFile(closetFile, top, bottom, shoes, headwear, accessory, bag);
 
-    int checkCloset_menuChoice=0, clothingSection_choice=0, addClothing_menuChoice=0;
-   
-    while (1) {
+    while (1)
+    {
         printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
-                "[1] Choose a clothing section\n"
-                "[2] Back\n"
-                "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+               "[1] Choose a clothing section\n"
+               "[2] Back\n"
+               "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
         printf("Choice: ");
         scanf("%d", &checkCloset_menuChoice);
 
-        switch (checkCloset_menuChoice) {
+        switch (checkCloset_menuChoice)
+        {
         case 1:
             clothingSection_choice = chooseClothingSection();
             displayClothingSection(clothingSection_choice, top, bottom, shoes, headwear, accessory, bag);
@@ -345,9 +347,9 @@ void checkCloset(
             return;
         default:
             printf("Invalid. Enter an integer corresponding to a choice only (1-2).\n"
-                    "Try again.\n");
+                   "Try again.\n");
         }
-    }  
+    }
 }
 
 
@@ -647,16 +649,120 @@ void pickOOTD(const char *filename)
             break;
     }
 
+    // REFACTOR: Create a function for logging the OOTD. and Reach end of line function
+
     printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
     printf("Outfit of the day:\n");
 
     snprintf(outfitLabel, sizeof(outfitLabel), "Outfit %d", option);
     displayOutfitEntry(outfits[option - 1], outfitLabel);
 
-    markOutfitClothesUnavailable(outfits[option - 1], filename);
+    char closetLogName[256];
+
+    strcpy(closetLogName, filename);
+
+    FILE *ootd_log_fp = fopen(strcat(closetLogName, "-log"), "a+");
+    char temp1[256], temp2[256];
+
+    if (fscanf(ootd_log_fp, "%s %s", temp1, temp2) <= 0)
+    {
+        fprintf(ootd_log_fp, "%s %s\n", "outfit_id", "date_worn");
+    }
+
+    fclose(ootd_log_fp);
+
+    // FOCUS HERE
+    ootd_log_fp = fopen(closetLogName, "r");
+
+    char last_outfit_id[256];
+    char last_worn_date_str[256];
+
+    fscanf(ootd_log_fp, "%s %s", temp1, temp2);
+
+    while (fscanf(ootd_log_fp, "%s %s", last_outfit_id, last_worn_date_str) > 0);
+
+    fclose(ootd_log_fp);
+
+
+    // Grab Current Date and format to MM/DD/YYYY
+    time_t current_date;
+    struct tm *current_date_tm;
+
+    current_date = time(NULL);
+    current_date_tm = localtime(&current_date);
+    char current_date_str[50];
+
+    strftime(current_date_str, 50, "%m/%d/%Y", current_date_tm);
+
+
+    // Check if the last worn_date and current day are the same
+    if (strcmp(current_date_str, last_worn_date_str) != 0)
+    {
+        printf("NOT THE SAME DAY!!!!\n");
+
+        ootd_log_fp = fopen(closetLogName, "a");
+        fprintf(ootd_log_fp, "%d %s\n", option, current_date_str);
+        fclose(ootd_log_fp);
+    }
+    else
+    {
+        printf("SAME DAY!!!!\n");
+        
+        FILE *temp_log;
+        char id_header[50], worn_date_header[50];
+        int id;
+        char closetTempLogName[256];
+        strcpy(closetTempLogName, closetLogName);
+        strcat(closetTempLogName, "-temp");
+
+        temp_log = fopen(closetTempLogName, "w");
+        ootd_log_fp = fopen(closetLogName, "r");
+
+        if (temp_log == NULL || ootd_log_fp == NULL)
+        {
+            printf("Error: Could not open file.\n");
+            return;
+        }
+
+        fscanf(ootd_log_fp, "%s %s", id_header, worn_date_header);
+        fprintf(temp_log, "%s %s\n", id_header, worn_date_header);
+
+        while (fscanf(ootd_log_fp, "%d %s", &id, last_worn_date_str) > 0)
+        {
+            if (strcmp(current_date_str, last_worn_date_str) == 0)
+            {
+                fprintf(temp_log, "%d %s\n", option, last_worn_date_str);
+            }
+            else
+            {
+                fprintf(temp_log, "%d %s\n", id, last_worn_date_str);
+            }
+        }
+
+        fclose(temp_log);
+        fclose(ootd_log_fp);
+
+        temp_log = fopen(closetTempLogName, "r");
+        ootd_log_fp = fopen(closetLogName, "w");
+
+        fscanf(temp_log, "%s %s", id_header, worn_date_header);
+        fprintf(ootd_log_fp, "%s %s\n", id_header, worn_date_header);
+
+        while (fscanf(temp_log, "%d %s\n", &id, last_worn_date_str) > 0)
+        {
+            fprintf(ootd_log_fp, "%d %s\n", id, last_worn_date_str);
+        }
+
+        fclose(temp_log);
+        fclose(ootd_log_fp);
+
+        remove(closetTempLogName);
+    }
+
+    markOutfitClothesUnavailable(outfits[option - 1]);
 }
 
-void checkOutfits(const char *filename)
+void checkOutfits(char *filename)
 {
     while (1)
     {
@@ -760,13 +866,13 @@ int main()
     printf("        WELCOME TO DIGITAL CLOSET        \n");
     printf("==========================================\n");
 
-    
-    // Checks for current closet thru another file, if it exists, change the value of closetName to current, else create one. 
+    // Checks for current closet thru another file, if it exists, change the value of closetName to current, else create one.
     FILE *closet_fp;
-    
+
     closet_fp = fopen("current-closet", "a+");
 
-    if(fscanf(closet_fp, "%s", closetName) <= 0) {
+    if (fscanf(closet_fp, "%s", closetName) <= 0)
+    {
         printf("Enter Closet Name: ");
         scanf("%[^\n]", closetName);
         fprintf(closet_fp, "%s", closetName);
