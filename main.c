@@ -19,6 +19,14 @@ struct Outfit
     struct Apparel *bag;
 };
 
+struct OutfitStats
+{
+    int outfit_id;
+    int times_worn_total;
+    int times_worn_week;
+    int times_worn_month;
+};
+
 struct Apparel tops[9] = {0};
 struct Apparel bottoms[9] = {0};
 struct Apparel shoes[9] = {0};
@@ -952,6 +960,203 @@ void pickOOTD(const char *filename)
     markOutfitClothesUnavailable(outfits[option - 1], filename);
 }
 
+
+// Outfit Worn Statistic
+int isWithinDays(const char *dateStr, int days)
+{
+    int month, day, year;
+    sscanf(dateStr, "%d/%d/%d", &month, &day, &year);
+
+    struct tm logDate = {0};
+    logDate.tm_mon = month - 1; // tm_mon is 0-based
+    logDate.tm_mday = day;
+    logDate.tm_year = year - 1900; // tm_year is years since 1900
+
+    time_t logTime = mktime(&logDate);
+    time_t currentTime = time(NULL);
+
+    double diffSeconds = difftime(currentTime, logTime);
+    double diffDays = diffSeconds / (60 * 60 * 24);
+
+    return (diffDays >= 0 && diffDays <= days);
+}
+
+// Calculate statistics from the log file
+void calculateOutfitStatistics(const char *closetName, struct OutfitStats stats[], int *statsCount)
+{
+    char logFilename[256];
+    snprintf(logFilename, sizeof(logFilename), "%s-log", closetName);
+
+    FILE *fp = fopen(logFilename, "r");
+    if (fp == NULL)
+    {
+        printf("No OOTD log found. Wear some outfits first!\n");
+        *statsCount = 0;
+        return;
+    }
+
+    // Initialize stats for all possible outfits
+    for (int i = 0; i < 50; i++)
+    {
+        stats[i].outfit_id = i + 1;
+        stats[i].times_worn_total = 0;
+        stats[i].times_worn_week = 0;
+        stats[i].times_worn_month = 0;
+    }
+
+    // Skip header line
+    char header1[50], header2[50];
+    if (fscanf(fp, "%s %s", header1, header2) <= 0)
+    {
+        fclose(fp);
+        *statsCount = 0;
+        return;
+    }
+
+    // Read and count each log entry
+    int outfitId;
+    char dateWorn[50];
+
+    while (fscanf(fp, "%d %s", &outfitId, dateWorn) == 2)
+    {
+        if (outfitId >= 1 && outfitId <= 50)
+        {
+            int idx = outfitId - 1;
+
+            // Total count
+            stats[idx].times_worn_total++;
+
+            // Within last 7 days (week)
+            if (isWithinDays(dateWorn, 7))
+            {
+                stats[idx].times_worn_week++;
+            }
+
+            // Within last 30 days (month)
+            if (isWithinDays(dateWorn, 30))
+            {
+                stats[idx].times_worn_month++;
+            }
+        }
+    }
+
+    fclose(fp);
+    *statsCount = created_outfits_count;
+}
+
+// Display statistics for all outfits
+void displayAllOutfitStatistics(const char *closetName)
+{
+    struct OutfitStats stats[50];
+    int statsCount;
+
+    calculateOutfitStatistics(closetName, stats, &statsCount);
+
+    if (statsCount == 0)
+    {
+        printf("No statistics available yet.\n");
+        return;
+    }
+
+    printf("\n==========================================\n");
+    printf("       OUTFIT WORN STATISTICS\n");
+    printf("==========================================\n");
+    printf("%-12s | %-8s | %-8s | %-8s\n", "Outfit", "Total", "Week", "Month");
+    printf("------------------------------------------\n");
+
+    for (int i = 0; i < statsCount; i++)
+    {
+        if (stats[i].times_worn_total > 0 || i < created_outfits_count)
+        {
+            printf("Outfit %-5d | %-8d | %-8d | %-8d\n",
+                   stats[i].outfit_id,
+                   stats[i].times_worn_total,
+                   stats[i].times_worn_week,
+                   stats[i].times_worn_month);
+        }
+    }
+    printf("==========================================\n");
+}
+
+// Display statistics for a specific outfit
+void displaySpecificOutfitStatistics(const char *closetName)
+{
+    struct OutfitStats stats[50];
+    int statsCount;
+    int outfitChoice;
+
+    printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+    printf("Available Outfits:\n");
+    printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+
+    for (int i = 0; i < created_outfits_count; i++)
+    {
+        char outfitLabel[50];
+        snprintf(outfitLabel, sizeof(outfitLabel), "Outfit %d", i + 1);
+        displayOutfitEntry(outfits[i], outfitLabel);
+    }
+
+    printf("\nEnter outfit number to view statistics: ");
+    scanf("%d", &outfitChoice);
+
+    if (outfitChoice < 1 || outfitChoice > created_outfits_count)
+    {
+        printf("ERROR: Invalid outfit number.\n");
+        return;
+    }
+
+    calculateOutfitStatistics(closetName, stats, &statsCount);
+
+    int idx = outfitChoice - 1;
+
+    printf("\n==========================================\n");
+    printf("     STATISTICS FOR OUTFIT %d\n", outfitChoice);
+    printf("==========================================\n");
+
+    // Display outfit details
+    char outfitLabel[50];
+    snprintf(outfitLabel, sizeof(outfitLabel), "Outfit %d", outfitChoice);
+    displayOutfitEntry(outfits[idx], outfitLabel);
+
+    printf("\n------------------------------------------\n");
+    printf("Times worn (Total):      %d\n", stats[idx].times_worn_total);
+    printf("Times worn (This Week):  %d\n", stats[idx].times_worn_week);
+    printf("Times worn (This Month): %d\n", stats[idx].times_worn_month);
+    printf("==========================================\n");
+}
+
+void outfitStatisticsMenu(const char *closetName)
+{
+    int choice;
+
+    while (1)
+    {
+        printf("\n==========================================\n");
+        printf("       OUTFIT STATISTICS MENU\n");
+        printf("==========================================\n");
+        printf("[1] View All Outfit Statistics\n");
+        printf("[2] View Specific Outfit Statistics\n");
+        printf("[3] Back\n");
+        printf("------------------------------------------\n");
+        printf("Select Option: ");
+        scanf("%d", &choice);
+
+        switch (choice)
+        {
+        case 1:
+            displayAllOutfitStatistics(closetName);
+            break;
+        case 2:
+            displaySpecificOutfitStatistics(closetName);
+            break;
+        case 3:
+            return;
+        default:
+            printf("ERROR: Invalid Option, Please try again.\n");
+        }
+    }
+}
+
 void checkOutfits(char *filename)
 {
     while (1)
@@ -974,7 +1179,8 @@ void checkOutfits(char *filename)
         printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
         printf("[1] Create Outfit\n");
         printf("[2] Pick Outfit of the Day\n");
-        printf("[3] Back\n");
+        printf("[3] View Outfit Statistics\n"); 
+        printf("[4] Back\n");
         printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
 
         printf("Choice: ");
@@ -991,6 +1197,10 @@ void checkOutfits(char *filename)
             break;
 
         case 3:
+            outfitStatisticsMenu(filename);
+            break;
+
+        case 4:
             return;
         default:
             printf("ERROR: Invalid Option, Please try again.\n");
