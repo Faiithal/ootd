@@ -19,6 +19,14 @@ struct Outfit
     struct Apparel *bag;
 };
 
+struct OutfitStats
+{
+    int outfit_id;
+    int times_worn_total;
+    int times_worn_week;
+    int times_worn_month;
+};
+
 struct Apparel tops[9] = {0};
 struct Apparel bottoms[9] = {0};
 struct Apparel shoes[9] = {0};
@@ -27,7 +35,7 @@ struct Apparel accessories[9] = {0};
 struct Apparel bags[9] = {0};
 
 struct Outfit outfits[50] = {0};
-int created_outfits_count = 2;
+int created_outfits_count = 0;
 
 // CHECK CLOSET FEATURE : Validate Choice
 
@@ -431,7 +439,7 @@ void checkCloset(
 
 // Add Apparel Helper Functions
 
-struct Apparel *chooseOutfitApparel(struct Outfit *outfit, struct Apparel apparels[])
+struct Apparel *chooseOutfitApparel(struct Apparel apparels[])
 {
     int option_piece;
     int createdApparelSize = 0;
@@ -505,7 +513,7 @@ int isOutfitAvailable(struct Outfit outfit)
     return 1;
 }
 
-int displayOutfitEntry(struct Outfit outfit, char outfitLabel[])
+void displayOutfitEntry(struct Outfit outfit, char outfitLabel[])
 {
     printf("( %s )", isOutfitAvailable(outfit) ? "Available" : "Unavailable");
 
@@ -561,22 +569,22 @@ void modifyOutfit(struct Outfit *outfit)
     switch (option)
     {
     case 1:
-        (*outfit).top = chooseOutfitApparel(outfit, tops);
+        (*outfit).top = chooseOutfitApparel(tops);
         break;
     case 2:
-        (*outfit).bottom = chooseOutfitApparel(outfit, bottoms);
+        (*outfit).bottom = chooseOutfitApparel(bottoms);
         break;
     case 3:
-        (*outfit).shoes = chooseOutfitApparel(outfit, shoes);
+        (*outfit).shoes = chooseOutfitApparel(shoes);
         break;
     case 4:
-        (*outfit).headwear = chooseOutfitApparel(outfit, headwears);
+        (*outfit).headwear = chooseOutfitApparel(headwears);
         break;
     case 5:
-        (*outfit).accessory = chooseOutfitApparel(outfit, accessories);
+        (*outfit).accessory = chooseOutfitApparel(accessories);
         break;
     case 6:
-        (*outfit).bag = chooseOutfitApparel(outfit, bags);
+        (*outfit).bag = chooseOutfitApparel(bags);
         break;
     default:
         printf("ERROR: Invalid Option, Please try again.\n");
@@ -596,7 +604,104 @@ void copyOutfit(struct Outfit *outfit, struct Outfit temp_outfit)
     (*outfit).bag = temp_outfit.bag;
 }
 
-void createOutfitMenu()
+// Helper for finding index of item in section array
+int findIndex(struct Apparel section[], struct Apparel *item)
+{
+    for (int i = 0; i < 9; i++)
+    {
+        if (&section[i] == item)
+            return i;
+    }
+    return -1;
+}
+
+void saveOutfitsToFile(const char *closetName)
+{
+    char filename[256];
+    snprintf(filename, sizeof(filename), "%s_outfits.txt", closetName);
+
+    FILE *fp = fopen(filename, "w");
+    if (fp == NULL)
+    {
+        printf("Error: Could not open %s for writing.\n", filename);
+        return;
+    }
+
+    // Write header with outfit count
+    fprintf(fp, "outfit_count:%d\n", created_outfits_count);
+
+    // Write each outfit as indices of closet items
+    for (int i = 0; i < created_outfits_count; i++)
+    {
+        fprintf(fp, "%d|%d|%d|%d|%d|%d\n",
+                outfits[i].top != NULL ? findIndex(tops, outfits[i].top) : -1,
+                outfits[i].bottom != NULL ? findIndex(bottoms, outfits[i].bottom) : -1,
+                outfits[i].shoes != NULL ? findIndex(shoes, outfits[i].shoes) : -1,
+                outfits[i].headwear != NULL ? findIndex(headwears, outfits[i].headwear) : -1,
+                outfits[i].accessory != NULL ? findIndex(accessories, outfits[i].accessory) : -1,
+                outfits[i].bag != NULL ? findIndex(bags, outfits[i].bag) : -1);
+    }
+
+    fclose(fp);
+    printf("[!] Outfits saved to %s\n", filename);
+}
+
+// Load outfits from file: [closet_name]_outfits.txt
+void loadOutfitsFromFile(const char *closetName)
+{
+    char filename[256];
+    snprintf(filename, sizeof(filename), "%s_outfits.txt", closetName);
+
+    FILE *fp = fopen(filename, "r");
+    if (fp == NULL)
+    {
+        // File doesn't exist yet - that's okay for first run
+        return;
+    }
+
+    char line[512];
+    int count = 0;
+
+    // Read header line
+    if (fgets(line, sizeof(line), fp) != NULL)
+    {
+        sscanf(line, "outfit_count:%d", &count);
+    }
+
+    // Read each outfit
+    for (int i = 0; i < count && i < 50; i++)
+    {
+        if (fgets(line, sizeof(line), fp) == NULL)
+            break;
+
+        // Remove newline
+        line[strcspn(line, "\n")] = '\0';
+
+        int topIdx = -1, bottomIdx = -1, shoesIdx = -1;
+        int headwearIdx = -1, accessoryIdx = -1, bagIdx = -1;
+
+        // Parse the pipe-delimited line of indices
+        int parsed = sscanf(line, "%d|%d|%d|%d|%d|%d",
+                            &topIdx, &bottomIdx, &shoesIdx, &headwearIdx, &accessoryIdx, &bagIdx);
+
+        if (parsed >= 1)
+        {
+            // Link pointers directly to apparel items in arrays using indices
+            outfits[i].top = (topIdx >= 0 && topIdx < 9 && tops[topIdx].name[0] != '\0') ? &tops[topIdx] : NULL;
+            outfits[i].bottom = (bottomIdx >= 0 && bottomIdx < 9 && bottoms[bottomIdx].name[0] != '\0') ? &bottoms[bottomIdx] : NULL;
+            outfits[i].shoes = (shoesIdx >= 0 && shoesIdx < 9 && shoes[shoesIdx].name[0] != '\0') ? &shoes[shoesIdx] : NULL;
+            outfits[i].headwear = (headwearIdx >= 0 && headwearIdx < 9 && headwears[headwearIdx].name[0] != '\0') ? &headwears[headwearIdx] : NULL;
+            outfits[i].accessory = (accessoryIdx >= 0 && accessoryIdx < 9 && accessories[accessoryIdx].name[0] != '\0') ? &accessories[accessoryIdx] : NULL;
+            outfits[i].bag = (bagIdx >= 0 && bagIdx < 9 && bags[bagIdx].name[0] != '\0') ? &bags[bagIdx] : NULL;
+        }
+    }
+
+    created_outfits_count = count;
+    fclose(fp);
+    printf("[!] Loaded %d outfits from %s\n", count, filename);
+}
+
+void createOutfitMenu(const char *filename)
 {
     struct Outfit temp_outfit = {0};
 
@@ -636,6 +741,10 @@ void createOutfitMenu()
                 }
                 copyOutfit(&outfits[created_outfits_count++], temp_outfit);
                 printf("Outfit Saved Successfully!\n");
+
+                // AUTO-SAVE to file after creating outfit
+                saveOutfitsToFile(filename);
+
                 return;
             }
             else
@@ -652,16 +761,7 @@ void createOutfitMenu()
     //
 }
 
-// Helper for markOutfitClothesUnavailable
-int findIndex(struct Apparel section[], struct Apparel *item)
-{
-    for (int i = 0; i < 9; i++)
-    {
-        if (&section[i] == item)
-            return i;
-    }
-    return -1;
-}
+// Helper findIndex is now defined above saveOutfitsToFile
 
 void markOutfitClothesUnavailable(struct Outfit outfit, const char *filename)
 {
@@ -721,24 +821,60 @@ void pickOOTD(const char *filename)
     int option;
     char outfitLabel[50];
 
+    if (created_outfits_count == 0)
+    {
+        printf("No outfits available. Create one first!\n");
+        return;
+    }
+
+    int anyAvailable = 0;
     for (int i = 0; i < created_outfits_count; i++)
     {
+        if (isOutfitAvailable(outfits[i]))
+        {
+            anyAvailable = 1;
+        }
         snprintf(outfitLabel, sizeof(outfitLabel), "Outfit %d", i + 1);
-        printf("[%d] %s\n", i + 1, outfitLabel);
+        printf("[%d] ", i + 1);
+        displayOutfitEntry(outfits[i], outfitLabel);
+    }
+    printf("[%d] Back\n", created_outfits_count + 1);
+
+    if (!anyAvailable)
+    {
+        printf("\n[!] WARNING: All outfits are currently unavailable. Wash laundry to make them available again.\n");
     }
 
     while (1)
     {
         printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
         printf("Pick an outfit: ");
-        scanf("%d", &option);
+        if (scanf("%d", &option) != 1)
+        {
+            while (getchar() != '\n')
+                ;
+            printf("Invalid input. Enter an integer corresponding to an outfit or %d to go back.\n", created_outfits_count + 1);
+            continue;
+        }
+
+        if (option == created_outfits_count + 1)
+        {
+            return;
+        }
 
         if (option < 1 || option > created_outfits_count)
         {
             printf("ERROR: Invalid Option, Please try again.\n");
+            continue;
         }
-        else
-            break;
+
+        if (!isOutfitAvailable(outfits[option - 1]))
+        {
+            printf("ERROR: Outfit is unavailable, pick an available outfit\n");
+            continue;
+        }
+
+        break;
     }
 
     // REFACTOR: Create a function for logging the OOTD. and Reach end of line function
@@ -766,8 +902,8 @@ void pickOOTD(const char *filename)
     // FOCUS HERE
     ootd_log_fp = fopen(closetLogName, "r");
 
-    char last_outfit_id[256];
-    char last_worn_date_str[256];
+    char last_outfit_id[256] = {0};
+    char last_worn_date_str[256] = {0};
 
     fscanf(ootd_log_fp, "%s %s", temp1, temp2);
 
@@ -853,6 +989,203 @@ void pickOOTD(const char *filename)
     markOutfitClothesUnavailable(outfits[option - 1], filename);
 }
 
+
+// Outfit Worn Statistic
+int isWithinDays(const char *dateStr, int days)
+{
+    int month, day, year;
+    sscanf(dateStr, "%d/%d/%d", &month, &day, &year);
+
+    struct tm logDate = {0};
+    logDate.tm_mon = month - 1; // tm_mon is 0-based
+    logDate.tm_mday = day;
+    logDate.tm_year = year - 1900; // tm_year is years since 1900
+
+    time_t logTime = mktime(&logDate);
+    time_t currentTime = time(NULL);
+
+    double diffSeconds = difftime(currentTime, logTime);
+    double diffDays = diffSeconds / (60 * 60 * 24);
+
+    return (diffDays >= 0 && diffDays <= days);
+}
+
+// Calculate statistics from the log file
+void calculateOutfitStatistics(const char *closetName, struct OutfitStats stats[], int *statsCount)
+{
+    char logFilename[256];
+    snprintf(logFilename, sizeof(logFilename), "%s-log", closetName);
+
+    FILE *fp = fopen(logFilename, "r");
+    if (fp == NULL)
+    {
+        printf("No OOTD log found. Wear some outfits first!\n");
+        *statsCount = 0;
+        return;
+    }
+
+    // Initialize stats for all possible outfits
+    for (int i = 0; i < 50; i++)
+    {
+        stats[i].outfit_id = i + 1;
+        stats[i].times_worn_total = 0;
+        stats[i].times_worn_week = 0;
+        stats[i].times_worn_month = 0;
+    }
+
+    // Skip header line
+    char header1[50], header2[50];
+    if (fscanf(fp, "%s %s", header1, header2) <= 0)
+    {
+        fclose(fp);
+        *statsCount = 0;
+        return;
+    }
+
+    // Read and count each log entry
+    int outfitId;
+    char dateWorn[50];
+
+    while (fscanf(fp, "%d %s", &outfitId, dateWorn) == 2)
+    {
+        if (outfitId >= 1 && outfitId <= 50)
+        {
+            int idx = outfitId - 1;
+
+            // Total count
+            stats[idx].times_worn_total++;
+
+            // Within last 7 days (week)
+            if (isWithinDays(dateWorn, 7))
+            {
+                stats[idx].times_worn_week++;
+            }
+
+            // Within last 30 days (month)
+            if (isWithinDays(dateWorn, 30))
+            {
+                stats[idx].times_worn_month++;
+            }
+        }
+    }
+
+    fclose(fp);
+    *statsCount = created_outfits_count;
+}
+
+// Display statistics for all outfits
+void displayAllOutfitStatistics(const char *closetName)
+{
+    struct OutfitStats stats[50];
+    int statsCount;
+
+    calculateOutfitStatistics(closetName, stats, &statsCount);
+
+    if (statsCount == 0)
+    {
+        printf("No statistics available yet.\n");
+        return;
+    }
+
+    printf("\n==========================================\n");
+    printf("       OUTFIT WORN STATISTICS\n");
+    printf("==========================================\n");
+    printf("%-12s | %-8s | %-8s | %-8s\n", "Outfit", "Total", "Week", "Month");
+    printf("------------------------------------------\n");
+
+    for (int i = 0; i < statsCount; i++)
+    {
+        if (stats[i].times_worn_total > 0 || i < created_outfits_count)
+        {
+            printf("Outfit %-5d | %-8d | %-8d | %-8d\n",
+                   stats[i].outfit_id,
+                   stats[i].times_worn_total,
+                   stats[i].times_worn_week,
+                   stats[i].times_worn_month);
+        }
+    }
+    printf("==========================================\n");
+}
+
+// Display statistics for a specific outfit
+void displaySpecificOutfitStatistics(const char *closetName)
+{
+    struct OutfitStats stats[50];
+    int statsCount;
+    int outfitChoice;
+
+    printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+    printf("Available Outfits:\n");
+    printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
+
+    for (int i = 0; i < created_outfits_count; i++)
+    {
+        char outfitLabel[50];
+        snprintf(outfitLabel, sizeof(outfitLabel), "Outfit %d", i + 1);
+        displayOutfitEntry(outfits[i], outfitLabel);
+    }
+
+    printf("\nEnter outfit number to view statistics: ");
+    scanf("%d", &outfitChoice);
+
+    if (outfitChoice < 1 || outfitChoice > created_outfits_count)
+    {
+        printf("ERROR: Invalid outfit number.\n");
+        return;
+    }
+
+    calculateOutfitStatistics(closetName, stats, &statsCount);
+
+    int idx = outfitChoice - 1;
+
+    printf("\n==========================================\n");
+    printf("     STATISTICS FOR OUTFIT %d\n", outfitChoice);
+    printf("==========================================\n");
+
+    // Display outfit details
+    char outfitLabel[50];
+    snprintf(outfitLabel, sizeof(outfitLabel), "Outfit %d", outfitChoice);
+    displayOutfitEntry(outfits[idx], outfitLabel);
+
+    printf("\n------------------------------------------\n");
+    printf("Times worn (Total):      %d\n", stats[idx].times_worn_total);
+    printf("Times worn (This Week):  %d\n", stats[idx].times_worn_week);
+    printf("Times worn (This Month): %d\n", stats[idx].times_worn_month);
+    printf("==========================================\n");
+}
+
+void outfitStatisticsMenu(const char *closetName)
+{
+    int choice;
+
+    while (1)
+    {
+        printf("\n==========================================\n");
+        printf("       OUTFIT STATISTICS MENU\n");
+        printf("==========================================\n");
+        printf("[1] View All Outfit Statistics\n");
+        printf("[2] View Specific Outfit Statistics\n");
+        printf("[3] Back\n");
+        printf("------------------------------------------\n");
+        printf("Select Option: ");
+        scanf("%d", &choice);
+
+        switch (choice)
+        {
+        case 1:
+            displayAllOutfitStatistics(closetName);
+            break;
+        case 2:
+            displaySpecificOutfitStatistics(closetName);
+            break;
+        case 3:
+            return;
+        default:
+            printf("ERROR: Invalid Option, Please try again.\n");
+        }
+    }
+}
+
 void checkOutfits(char *filename)
 {
     while (1)
@@ -875,7 +1208,8 @@ void checkOutfits(char *filename)
         printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
         printf("[1] Create Outfit\n");
         printf("[2] Pick Outfit of the Day\n");
-        printf("[3] Back\n");
+        printf("[3] View Outfit Statistics\n"); 
+        printf("[4] Back\n");
         printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
 
         printf("Choice: ");
@@ -884,7 +1218,7 @@ void checkOutfits(char *filename)
         switch (option)
         {
         case 1:
-            createOutfitMenu();
+            createOutfitMenu(filename);
             break;
 
         case 2:
@@ -892,6 +1226,10 @@ void checkOutfits(char *filename)
             break;
 
         case 3:
+            outfitStatisticsMenu(filename);
+            break;
+
+        case 4:
             return;
         default:
             printf("ERROR: Invalid Option, Please try again.\n");
@@ -981,6 +1319,9 @@ int main()
     {
         fclose(fp);
     }
+
+    loadClosetFile(closetFile, tops, bottoms, shoes, headwears, accessories, bags);
+    loadOutfitsFromFile(closetName);
 
     // --- ACTION MENU ---
     while (1)
