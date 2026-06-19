@@ -605,6 +605,7 @@ void copyOutfit(struct Outfit *outfit, struct Outfit temp_outfit)
 }
 
 // Helper for finding index of item in section array
+
 int findIndex(struct Apparel section[], struct Apparel *item)
 {
     for (int i = 0; i < 9; i++)
@@ -647,6 +648,7 @@ void saveOutfitsToFile(const char *closetName)
 }
 
 // Load outfits from file: [closet_name]_outfits.txt
+
 void loadOutfitsFromFile(const char *closetName)
 {
     char filename[256];
